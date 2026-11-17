@@ -172,6 +172,9 @@ const depth = { nine: 14, twentyone: 6, twelve: 10, eleven: 17 } as Record<strin
     .num__in { min-height: 0; padding-top: 1.8rem; margin-inline: 0; }
     .num__list { display: grid; grid-template-columns: 1fr 1fr; gap: 1.6rem 1rem; margin-top: 1.6rem; }
     .num__item { position: static; }
+    /* the ring hangs off the figure's own box; once the figures stack in flow
+       there is no box to hang from, so the mark goes rather than floating */
+    .num__ring { display: none; }
     .num__item--twentyone .num__fig { font-size: clamp(5rem, 24vw, 8rem); }
     .num__item--nine .num__fig { font-size: clamp(3.6rem, 18vw, 6rem); }
     .num__item--twelve .num__fig { font-size: clamp(4rem, 20vw, 7rem); }
