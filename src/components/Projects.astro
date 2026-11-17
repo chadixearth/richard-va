@@ -4,6 +4,16 @@ import { work, stats } from "../data/content";
 import Rail from "./Rail.astro";
 import leaf from "../assets/photos/svc-3.jpg";
 import w2 from "../assets/photos/work-2.jpg";
+import p1 from "../assets/photos/proj-1.jpg";
+import p2 from "../assets/photos/proj-2.jpg";
+import p3 from "../assets/photos/proj-3.jpg";
+import p4 from "../assets/photos/proj-4.jpg";
+
+/* One object per build, in card order: the phone and the question sheet for
+   the interviewer, the pencilled flow for the agent, the prints laid out in a
+   grid for the social desk, the highlighted list for the prospecting. They are
+   objects from the work, not screenshots of it, and the cards say which. */
+const shot = [p1, p2, p3, p4];
 
 /* Composition note: the four builds are clippings pinned to one page, and the
    page is the whole sheet. They are wide, they overlap left to right like a
@@ -46,6 +56,7 @@ const tape = [false, true, true, false];
       {work.map((c, i) => (
         <article class={`proj__clip proj__clip--${i + 1}`}>
           {tape[i] && <span class="tape proj__tape" data-drift="10" aria-hidden="true"></span>}
+          <Image class="cut proj__shot" src={shot[i]} alt="" widths={[300, 600]} sizes="20vw" loading="lazy" />
           <p class="label proj__label">{c.label}</p>
           <h3 class="d3 proj__t">{c.title}</h3>
           <p class="body-s proj__body">{c.body}</p>
@@ -137,6 +148,16 @@ const tape = [false, true, true, false];
 
   .proj__tape { top: -0.7rem; left: 50%; margin-left: -37px; rotate: -4deg; }
   .proj__clip--3 .proj__tape { left: auto; right: 12%; margin-left: 0; rotate: 5deg; }
+
+  /* a clipping stapled across the top of each note, cropped to a strip so the
+     card keeps its proportions and the text below is untouched */
+  .proj__shot {
+    display: block;
+    width: 100%;
+    height: clamp(40px, min(5vw, 7.6vh), 68px);
+    object-fit: cover;
+    margin-bottom: 0.6rem;
+  }
 
   .proj__label { color: var(--muted); margin-bottom: 0.4rem; }
   .proj__t {

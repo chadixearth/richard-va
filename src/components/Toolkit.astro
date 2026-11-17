@@ -2,7 +2,8 @@
 import { Image } from "astro:assets";
 import { marquee } from "../data/content";
 import Rail from "./Rail.astro";
-import strata from "../assets/photos/svc-2.jpg";
+import strata from "../assets/photos/tex-2.jpg";
+import board from "../assets/photos/svc-6.jpg";
 
 // Six rows, each carrying the whole stack but started at a different tool, so
 // no two rows ever line up and nothing repeats inside one screen. motion.ts
@@ -29,6 +30,10 @@ const rowTools = (start: number) =>
   <div class="tk__wall rv">
     <div class="tk__top">
       <Image class="cut cut--bot bleed tk__bot" data-drift="5" src={strata} alt="" widths={[300, 600]} sizes="28vw" />
+      <figure class="snap tk__snap" data-drift="12">
+        <Image class="cut" src={board} alt="" widths={[240, 480]} sizes="12vw" loading="lazy" />
+        <figcaption class="script">a month, pinned</figcaption>
+      </figure>
       <div class="tk__head">
         <h2 class="d1 tk__a">Tools</h2>
         <span class="script tk__b" data-drift="6">I run daily</span>
@@ -70,6 +75,20 @@ const rowTools = (start: number) =>
 
   /* ── heading band: the word stands on the first rule, a leaf beside it ── */
   .tk__top { position: relative; flex: none; display: flex; align-items: flex-end; min-height: clamp(5rem, min(12.4vw, 19vh), 11rem); }
+  /* the one object on a board that is otherwise all type, dropped into the
+     gap between the heading and the corner ghost */
+  .tk__snap {
+    position: absolute;
+    z-index: 4;
+    left: 66%;
+    bottom: 2%;
+    width: clamp(78px, min(7.8vw, 12vh), 112px);
+    margin: 0;
+    rotate: -6deg;
+  }
+  .tk__snap :global(img) { aspect-ratio: 4 / 5; }
+  .tk__snap figcaption { padding-top: 0.26rem; font-size: clamp(0.86rem, 1.05vw, 1rem); text-align: center; }
+
   .tk__head { position: relative; z-index: 3; display: flex; align-items: flex-end; gap: clamp(0.8rem, 2vw, 1.8rem); width: fit-content; margin: 0; }
   .tk__a { font-size: clamp(3rem, min(10.4vw, 16.4vh), 9.6rem); line-height: 0.8; margin-bottom: 0.03em; }
   .tk__b {
@@ -171,7 +190,7 @@ const rowTools = (start: number) =>
     .tk__a { font-size: clamp(3rem, min(16vw, 25.60vh), 5rem); }
     .tk__b { position: static; display: block; font-size: 1.6rem; }
     .tk__head { display: flex; align-items: baseline; gap: 0.8rem; flex-wrap: wrap; }
-    .tk__bot { display: none; }
+    .tk__bot, .tk__snap { display: none; }
     .tk__row { flex: none; }
     .tool--t3 { font-size: 1.8rem; }
     .tool--t2 { font-size: 1.3rem; }

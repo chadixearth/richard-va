@@ -4,6 +4,7 @@ import { profile } from "../data/content";
 import Rail from "./Rail.astro";
 import headshot from "../assets/richard-headshot.jpg";
 import leaf from "../assets/photos/svc-3.jpg";
+import signoff from "../assets/photos/ct-1.jpg";
 
 const mailto = `mailto:${profile.email}?subject=${encodeURIComponent("VA enquiry for " + profile.name)}`;
 
@@ -39,6 +40,11 @@ const rows = [
       <figure class="snap ct__pol" data-drift="15">
         <Image src={headshot} alt={profile.name} widths={[260, 520]} sizes="200px" loading="lazy" />
         <figcaption class="script">Available now</figcaption>
+      </figure>
+
+      <figure class="snap ct__sign" data-drift="9">
+        <Image class="cut" src={signoff} alt="" widths={[260, 520]} sizes="15vw" loading="lazy" />
+        <figcaption class="script">last note of the day</figcaption>
       </figure>
 
       <dl class="ct__dl">
@@ -105,6 +111,18 @@ const rows = [
     rotate: 3deg;
   }
   .ct__pol :global(img) { aspect-ratio: 4 / 5; }
+  /* the sign-off, tucked under the pinned polaroid and above the details */
+  .ct__sign {
+    position: absolute;
+    z-index: 3;
+    left: 1%;
+    top: clamp(0.4rem, 2vw, 1.6rem);
+    width: clamp(104px, min(11.4vw, 17vh), 158px);
+    margin: 0;
+    rotate: -4deg;
+  }
+  .ct__sign :global(img) { aspect-ratio: 4 / 3; }
+  .ct__sign figcaption { padding-top: 0.28rem; font-size: clamp(0.88rem, 1.1vw, 1.02rem); text-align: center; }
   .ct__pol figcaption { padding-top: 0.3rem; font-size: 0.92rem; text-align: center; }
 
   .ct__dl { position: relative; z-index: 1; border-top: 1px solid var(--rule); }
@@ -158,6 +176,6 @@ const rows = [
     .ct__in { grid-template-columns: minmax(0, 1fr); }
     /* one column: the snapshot sits above the list instead of on top of it */
     .ct__pol { margin: 0 auto 0.9rem 0; }
-    .ct__bot { display: none; }
+    .ct__bot, .ct__sign { display: none; }
   }
 </style>

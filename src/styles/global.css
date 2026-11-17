@@ -554,19 +554,17 @@ button { font: inherit; color: inherit; }
 }
 
 /* Photocopied picture: printed into the paper with `multiply`, so the sheet
-   shows through. Three treatments, because the source photos are dark and
-   moody and each one needs a different exposure to read on cream:
-     .cut        grayscale(1) contrast(1.48) brightness(1.52)
-                 a snapshot, lifted until it is a high-key photocopy
-     .cut--hard  grayscale(1) contrast(1.9)  brightness(1.4)
-                 the figure, pushed until it reads as solid ink
-     .cut--bot   grayscale(1) invert(1) contrast(1.25) brightness(1.05)
-                 botanical matter, inverted so leaves go dark on white and
-                 the background dissolves into the paper
+   shows through. The bake normalises every picture first, lifting its median
+   tone to the one its slot wants, so a dark generation and a light one of the
+   same subject land in the same place on the sheet. Three treatments:
+     .cut        a snapshot, lifted until it is a high-key photocopy
+     .cut--hard  the figure, pushed until it reads as solid ink
+     .cut--bot   a pale ghost texture, paper or grain, held so light that it
+                 reads as a watermark the type can sit on top of
 
-   Those chains are baked into the source bitmaps, not run as CSS `filter`.
+   Those grades are baked into the source bitmaps, not run as CSS `filter`.
    Same picture, applied once at full resolution; 2.7 megapixels of grayscale,
-   contrast and invert no longer recompute every time a board repaints. The
+   gamma and contrast no longer recompute every time a board repaints. The
    variant classes are kept on the markup as the record of which exposure a
    picture carries. Ungraded originals: src/assets/.orig.                    */
 .cut {

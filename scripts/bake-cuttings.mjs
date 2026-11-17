@@ -59,6 +59,9 @@ const assets = join(root, "src", "assets");
 
 /* which grade each slot carries */
 const EXPOSURE = {
+  "proj-1.jpg": "photo", "proj-2.jpg": "photo", "proj-3.jpg": "photo", "proj-4.jpg": "photo",
+  "svc-4.jpg": "photo", "svc-5.jpg": "photo", "svc-6.jpg": "photo",
+  "ct-1.jpg": "photo", "tex-2.jpg": "grain",
   "work-1.jpg": "photo",
   "work-2.jpg": "photo",
   "work-3.jpg": "photo",
