@@ -43,11 +43,11 @@ from flipping the background.
 ## Assets
 - `src/assets/richard-cutout.png` — background-removed portrait (rembg, isnet-general-use).
 - `src/assets/richard-headshot.jpg` — headshot, pasted as a torn snapshot.
-- `src/assets/photos/*.jpg` — Unsplash photography (free licence), standing in until
-  real work is shot. The source frames are dark and moody, so they are never shown
-  straight: each one is printed into the paper as a high-key photocopy, the figure is
-  pushed to near-solid ink, and the botanical frames are inverted so the leaves go dark
-  and the background dissolves into the sheet. Every clipping is masked with a soft
+- `src/assets/photos/*.jpg` — generated to brief (see `IMAGE-PROMPTS.md`): desks, plans,
+  printed work. The source frames are dark and moody, so they are never shown
+  straight: the bake lifts each one to the tone its slot wants, prints it into the paper
+  as a high-key photocopy, pushes the figure to near-solid ink, and keeps the two corner
+  ghosts pale enough to read as a watermark. Every clipping is masked with a soft
   radial so it reads as torn, not as a rectangle of stock photo.
 - The exposures are **baked into the files**, not applied as a CSS `filter`, because
   filtering megapixels on every repaint made the scroll expensive. The ungraded

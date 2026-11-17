@@ -1,5 +1,9 @@
 # Image prompts for the deck
 
+**All seven generated slots are filled and live.** This file is kept as the
+record of what each slot is for, so a picture can be regenerated against the
+same brief. What the deck still wants is in `IMAGE-PROMPTS-NEXT.md`.
+
 Nine picture slots. Matcha is the colour system (the green, the cream paper,
 the grain), not the subject. Every photograph should show the work: a desk, a
 plan, a printed report, a headset, the end of a long day. The green does the
@@ -27,6 +31,11 @@ a file twice; the exposure compounds.
 
 Because everything ends up black and white, colour in the source does not
 matter. Light does. Ask for one strong light and deep shadow, every time.
+
+The bake normalises exposure: it finds the gamma that puts each image's
+median tone where the slot wants it, then applies contrast pivoted on that
+tone. A darker or brighter generation of the same subject lands in the same
+place on the sheet, so you do not have to match an exposure by eye.
 
 ## Say this at the end of every prompt
 
