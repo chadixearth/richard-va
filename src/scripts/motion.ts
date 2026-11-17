@@ -273,7 +273,7 @@ function parallax(slide: El, props: El[]) {
     gsap.to(p, {
       yPercent: depth,
       ease: "none",
-      scrollTrigger: { trigger: slide, start: "top bottom", end: "bottom top", scrub: 0.7 },
+      scrollTrigger: { trigger: slide, start: "top bottom", end: "bottom top", scrub: 0.4 },
     });
   });
 }
@@ -331,7 +331,7 @@ function draws(slide: El) {
       start: "top 72%",
       endTrigger: (slide.nextElementSibling as El) || slide,
       end: slide.nextElementSibling ? "top 60%" : "bottom bottom",
-      scrub: 0.6,
+      scrub: 0.35,
     },
   });
 }
@@ -546,7 +546,7 @@ function dayRail() {
         start: "top 75%",
         endTrigger: next || slide,
         end: next ? "top 55%" : "bottom 20%",
-        scrub: 0.5,
+        scrub: 0.3,
       },
     })
     .fromTo(rows, { "--draw": 0 }, { "--draw": 1, ease: "none", duration: 1, stagger: 1 }, 0);
