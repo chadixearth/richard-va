@@ -145,22 +145,31 @@ function stack() {
     };
     place();
 
+    /* The board's dim sheet is a real element so the stack tween can animate
+       `opacity` on the compositor. Animating `--dim` instead invalidated the
+       style of every node in the board on every scroll frame. */
+    const dims = slides.map((s) => {
+      const d = doc.createElement("div");
+      d.className = "slide__dim";
+      d.setAttribute("aria-hidden", "true");
+      s.appendChild(d);
+      return d;
+    });
+
     /* Each board is pushed back by the one arriving on top of it. */
     const tweens = slides.slice(0, -1).map((s, i) =>
-      gsap.to(s, {
-        scale: 0.945,
-        yPercent: -1.1,
-        "--dim": 0.4,
-        ease: "none",
-        transformOrigin: "50% 30%",
-        scrollTrigger: {
-          trigger: slides[i + 1],
-          start: "top bottom",
-          end: "top top",
-          scrub: 0.4,
-          invalidateOnRefresh: true,
-        },
-      })
+      gsap
+        .timeline({
+          scrollTrigger: {
+            trigger: slides[i + 1],
+            start: "top bottom",
+            end: "top top",
+            scrub: 0.25,
+            invalidateOnRefresh: true,
+          },
+        })
+        .to(s, { scale: 0.945, yPercent: -1.1, ease: "none", transformOrigin: "50% 30%" }, 0)
+        .to(dims[i], { opacity: 0.4, ease: "none" }, 0)
     );
 
     ScrollTrigger.addEventListener("refreshInit", place);
@@ -170,9 +179,10 @@ function stack() {
         t.scrollTrigger?.kill();
         t.kill();
       }
+      for (const d of dims) d.remove();
       for (const s of slides) {
         s.style.removeProperty("--fit");
-        gsap.set(s, { clearProps: "transform,--dim" });
+        gsap.set(s, { clearProps: "transform" });
       }
       for (const v of ["--park", "--board", "--hold"]) root.style.removeProperty(v);
       root.classList.remove("stacked");
@@ -389,6 +399,11 @@ function cover() {
 
 /* ── 5. the tool rows run as marquees ────────────────────────── */
 const loops: gsap.core.Tween[] = [];
+/* a row holds still when you point at it, and the whole set holds still while
+   the toolkit board is off screen — six infinite tweens repainting a board
+   nobody is looking at is pure tax on every other board's scroll */
+const syncs: (() => void)[] = [];
+let tkNear = true;
 
 function toolkit() {
   const rows = all(".tk__row");
@@ -428,24 +443,54 @@ function toolkit() {
 
     /* a row you are pointing at or reading with the keyboard holds still,
        so a long tool name can actually be read */
-    const hold = () => loop.pause();
-    const go = () => loop.resume();
+    let hovered = false;
+    const sync = () => (tkNear && !hovered ? loop.resume() : loop.pause());
+    syncs.push(sync);
+    const hold = () => {
+      hovered = true;
+      sync();
+    };
+    const go = () => {
+      hovered = false;
+      sync();
+    };
     row.addEventListener("pointerenter", hold);
     row.addEventListener("pointerleave", go);
     row.addEventListener("focusin", hold);
     row.addEventListener("focusout", go);
   });
+
+  const board = one(".tk");
+  if (!board || !syncs.length) return;
+  ScrollTrigger.create({
+    trigger: board,
+    start: "top bottom",
+    end: "bottom top",
+    onToggle: (self) => {
+      tkNear = self.isActive;
+      for (const s of syncs) s();
+    },
+  });
+  tkNear = false;
+  for (const s of syncs) s();
 }
 
 /* ── 6. scroll velocity feeds the marquees ───────────────────── */
 function velocity() {
   let idle = 0;
-  const ease = { duration: 0.45, overwrite: true as const, ease: "power2.out" };
 
   ScrollTrigger.create({
     onUpdate: (self) => {
+      if (!tkNear) return;
       const v = gsap.utils.clamp(-5, 5, self.getVelocity() / 320);
-      loops.forEach((t, i) => gsap.to(t, { timeScale: 1 + v * (i % 2 === 1 ? -1 : 1), ...ease }));
+      /* eased in place rather than with a fresh tween per loop per frame:
+         the old version built six tweens every scroll frame and threw them
+         away on the next one */
+      for (let i = 0; i < loops.length; i++) {
+        const t = loops[i];
+        const want = 1 + v * (i % 2 === 1 ? -1 : 1);
+        t.timeScale(t.timeScale() + (want - t.timeScale()) * 0.2);
+      }
       clearTimeout(idle);
       idle = window.setTimeout(() => {
         for (const t of loops) gsap.to(t, { timeScale: 1, duration: 0.9, overwrite: true });
@@ -568,7 +613,11 @@ function navState() {
    stack survives. (ScrollSmoother and wrapper-transform smooth-scrollers
    do not: they are the reason this file does its own stacking.)        */
 function smooth() {
-  const lenis = new Lenis({ lerp: 0.085, wheelMultiplier: 0.95 });
+  /* `lerp: 0.085` read as lag rather than weight: the page needed roughly
+     half a second to finish catching up with the wheel, and every scrubbed
+     tween then trailed that already-trailing position. 0.14 still glides,
+     but the board is where your hand put it. */
+  const lenis = new Lenis({ lerp: 0.14, wheelMultiplier: 1 });
   root.style.scrollBehavior = "auto";
   lenis.on("scroll", ScrollTrigger.update);
   gsap.ticker.add((time) => lenis.raf(time * 1000));

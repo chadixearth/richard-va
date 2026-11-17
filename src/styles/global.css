@@ -136,7 +136,15 @@ button { font: inherit; color: inherit; }
 }
 .slide:last-child { margin-bottom: 0; }
 
-/* the paper itself: a pressed, slightly uneven sheet */
+/* The paper itself: a pressed, slightly uneven sheet.
+
+   This used to be `mix-blend-mode: multiply`, which was the single most
+   expensive thing on the page: a blended full-board layer cannot be cached by
+   the compositor, so every board re-rasterised on every scroll frame while the
+   stack scaled it. The board under it is a flat `--cream`, and multiplying a
+   near-black wash over a flat ground is the same picture as laying that wash
+   on at normal alpha, so the blend buys nothing. The white highlight was a
+   no-op under multiply (white × anything is anything) and is gone. */
 .slide::before {
   content: "";
   position: absolute;
@@ -144,31 +152,32 @@ button { font: inherit; color: inherit; }
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(120% 90% at 18% 6%, rgba(255, 255, 255, 0.72), transparent 56%),
-    radial-gradient(110% 80% at 86% 96%, rgba(14, 21, 9, 0.07), transparent 58%),
+    radial-gradient(110% 80% at 86% 96%, rgba(14, 21, 9, 0.062), transparent 58%),
     repeating-linear-gradient(
       104deg,
-      rgba(14, 21, 9, 0.022) 0 2px,
+      rgba(14, 21, 9, 0.019) 0 2px,
       transparent 2px 7px
     ),
     repeating-linear-gradient(
       17deg,
-      rgba(14, 21, 9, 0.018) 0 1px,
+      rgba(14, 21, 9, 0.016) 0 1px,
       transparent 1px 9px
     );
-  mix-blend-mode: multiply;
-  opacity: 0.9;
 }
 
-/* the shadow the arriving board casts on the one it covers */
-.slide::after {
-  content: "";
+/* The shadow the arriving board casts on the one it covers.
+
+   A real element, not `::after` with `opacity: var(--dim)`. Animating a custom
+   property invalidates the style of every node inside the board on every
+   frame; animating opacity on one element is a compositor job and touches no
+   style at all. motion.ts appends it when the stack switches on. */
+.slide__dim {
   position: absolute;
   inset: 0;
   z-index: 9;
   pointer-events: none;
   background: var(--ink);
-  opacity: var(--dim);
+  opacity: 0;
 }
 
 /* ── the stack itself — switched on by motion.ts above 900×620 ──
@@ -188,9 +197,15 @@ button { font: inherit; color: inherit; }
   min-height: 0;
   margin-bottom: var(--hold, var(--deckgap));
   box-shadow: 0 -26px 50px -30px rgba(14, 21, 9, 0.62);
+  /* the board is scaled to 0.945 as the next one covers it. Without this the
+     browser re-rasterises a full-screen board at every intermediate scale;
+     with it the board is drawn once and the GPU scales that texture. */
+  will-change: transform;
 }
 .stacked .slide:last-child { margin-bottom: 0; }
 .stacked .slide > * { zoom: var(--fit, 1); }
+/* the dim sheet covers the board, so it must not be scaled with the content */
+.stacked .slide > .slide__dim { zoom: 1; }
 
 /* slide index tab, top-left of every panel */
 .slide__no {
@@ -541,18 +556,24 @@ button { font: inherit; color: inherit; }
 /* Photocopied picture: printed into the paper with `multiply`, so the sheet
    shows through. Three treatments, because the source photos are dark and
    moody and each one needs a different exposure to read on cream:
-     .cut        a snapshot, lifted until it is a high-key photocopy
-     .cut--hard  the figure, pushed until it reads as solid ink
-     .cut--bot   botanical matter, inverted so leaves go dark on white and
-                 the background dissolves into the paper                   */
+     .cut        grayscale(1) contrast(1.48) brightness(1.52)
+                 a snapshot, lifted until it is a high-key photocopy
+     .cut--hard  grayscale(1) contrast(1.9)  brightness(1.4)
+                 the figure, pushed until it reads as solid ink
+     .cut--bot   grayscale(1) invert(1) contrast(1.25) brightness(1.05)
+                 botanical matter, inverted so leaves go dark on white and
+                 the background dissolves into the paper
+
+   Those chains are baked into the source bitmaps, not run as CSS `filter`.
+   Same picture, applied once at full resolution; 2.7 megapixels of grayscale,
+   contrast and invert no longer recompute every time a board repaints. The
+   variant classes are kept on the markup as the record of which exposure a
+   picture carries. Ungraded originals: src/assets/.orig.                    */
 .cut {
   position: relative;
   display: block;
-  filter: grayscale(1) contrast(1.48) brightness(1.52);
   mix-blend-mode: multiply;
 }
-.cut--hard { filter: grayscale(1) contrast(1.9) brightness(1.4); }
-.cut--bot { filter: grayscale(1) invert(1) contrast(1.25) brightness(1.05); }
 
 /* the dot screen that sells the photocopy */
 .screened { position: relative; }
