@@ -600,3 +600,112 @@ button { font: inherit; color: inherit; }
    <Image> emits a real `height` attribute, and without this a clipping
    given a width is stretched into a tall strip. */
 .bleed { position: absolute; z-index: 1; pointer-events: none; height: auto; }
+
+/* ── the mark, drawn line art, and the small interactions ──────
+
+   Everything here is one ink on paper: a stroke that can be drawn, a plate
+   that can be stamped, a label that can be copied. The --draw variable runs
+   0 to 1 on a stroke the same way it does on a rule, so a mark reads as
+   being made rather than appearing.                                      */
+.mk { width: 1.9em; height: auto; overflow: visible; flex: none; }
+.mk path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - var(--draw, 1));
+}
+
+/* a line drawing that rules itself in: a ring around a figure, an arrow
+   that points at the thing it is talking about */
+/* a drawn mark is allowed to run wider than the thing it rings: the global
+   svg max-width would otherwise crop it to the element it annotates */
+.ink { position: absolute; pointer-events: none; overflow: visible; max-width: none; color: var(--pen); }
+.ink path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: var(--ink-w, 2.4);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - var(--draw, 1));
+}
+
+/* the running head: mark, then name, the name answering the pointer with
+   the soft and wonk axes the display face already carries */
+/* the mark rides inside the running head’s existing height: a taller nav
+   would eat into every board’s frame and cost the deck its 1:1 fit */
+.nav__brand { display: inline-flex; align-items: center; gap: 0.5rem; line-height: 1; }
+.nav__mk { width: 1.5em; margin-block: -0.42em; }
+.nav__name {
+  font-variation-settings: "SOFT" 0, "WONK" 0;
+  transition: font-variation-settings 0.45s var(--ease);
+}
+.nav__brand:hover .nav__name, .nav__brand:focus-visible .nav__name {
+  font-variation-settings: "SOFT" 60, "WONK" 1;
+}
+
+/* off-register print: a heading lands with its second pass a few
+   millimetres out and pulls into register, the way a two-colour job does
+   on a hand-fed press */
+.proj .d1, .num__by, .ft__mark { text-shadow: var(--ex, 0px) var(--ey, 0px) 0 var(--powder); }
+
+/* a detail you can take with you. Real control, real clipboard, and the
+   confirmation is written rather than toasted. */
+/* the control only exists once the script that makes it work does: with
+   JavaScript off the address is still a link, and there is no button that
+   does nothing */
+.copy { display: none; }
+.can-copy .copy {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  margin-left: 0.4rem;
+  padding: 0;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  vertical-align: -0.35rem;
+  transition: color 0.25s var(--ease), border-color 0.25s var(--ease), translate 0.25s var(--ease);
+}
+.copy svg { width: 0.85rem; height: 0.85rem; }
+.copy:hover, .copy:focus-visible { color: var(--pen); border-color: var(--pen); translate: 0 -1px; }
+.copy:active { translate: 0 1px; }
+/* a finger needs a bigger target than a cursor does */
+@media (pointer: coarse) {
+  .copy { width: 2.75rem; height: 2.75rem; margin-left: 0.5rem; vertical-align: -0.9rem; }
+  .copy svg { width: 1.1rem; height: 1.1rem; }
+}
+.copy__stamp {
+  position: absolute;
+  left: 50%;
+  bottom: 115%;
+  translate: -50% 6px;
+  rotate: -6deg;
+  white-space: nowrap;
+  font-family: var(--script);
+  font-size: 1.05rem;
+  color: var(--pen);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s var(--ease), translate 0.3s var(--ease);
+}
+.copy.is-done { color: var(--pen); border-color: var(--pen); }
+.copy.is-done .copy__stamp { opacity: 1; translate: -50% 0; }
+
+/* every button takes the press */
+.btn:active { translate: 0 2px; }
+.nav__cta:active { translate: 0 1px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .copy, .copy__stamp, .nav__name { transition: none; }
+  .mk path, .ink path { stroke-dashoffset: 0; }
+  .proj .d1, .num__by, .ft__mark { text-shadow: none; }
+}

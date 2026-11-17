@@ -30,6 +30,11 @@ const rows = [
         I'd automate, and what it costs. No deck, no discovery fee.
       </p>
 
+      <svg class="ink ct__arrow" viewBox="0 0 200 120" aria-hidden="true" focusable="false">
+        <path d="M192 12 C152 32 98 40 56 78" pathLength="1" data-draw />
+        <path d="M46 58 L54 80 L74 74" pathLength="1" data-draw />
+      </svg>
+
       <div class="ct__cta">
         <a class="btn" href={mailto}><span>Email me</span></a>
         <a class="btn btn--ghost" href={`tel:${profile.phoneHref}`}><span>{profile.phone}</span></a>
@@ -54,6 +59,14 @@ const rows = [
               <dt class="label">{r.k}</dt>
               <dd class="ct__v">
                 <a class="ct__a" href={r.href}>{r.v}</a>
+                <button class="copy" type="button" data-copy={r.v} aria-label={`Copy ${r.k.toLowerCase()}`}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <rect x="9" y="9" width="11" height="11" rx="2" />
+                    <path d="M5 15H4.5A1.5 1.5 0 0 1 3 13.5v-9A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V5" />
+                  </svg>
+                  <span class="copy__stamp" aria-hidden="true">copied</span>
+                  <span class="sr copy__sr" aria-live="polite"></span>
+                </button>
               </dd>
             </div>
           ))
@@ -122,6 +135,17 @@ const rows = [
     rotate: -4deg;
   }
   .ct__sign :global(img) { aspect-ratio: 4 / 3; }
+
+  /* the pen points at the one thing to do on this board */
+  .ct__arrow {
+    left: 14%;
+    bottom: 9%;
+    width: clamp(120px, 14vw, 196px);
+    height: auto;
+    --ink-w: 2.2;
+    z-index: 2;
+  }
+  @media (max-width: 1000px), (max-height: 700px) { .ct__arrow { display: none; } }
   .ct__sign figcaption { padding-top: 0.28rem; font-size: clamp(0.88rem, 1.1vw, 1.02rem); text-align: center; }
   .ct__pol figcaption { padding-top: 0.3rem; font-size: 0.92rem; text-align: center; }
 

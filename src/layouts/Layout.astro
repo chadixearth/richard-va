@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import { profile } from "../data/content";
+import Mark from "../components/Mark.astro";
 
 const title = `${profile.name} · ${profile.role}`;
 const description = profile.tagline;
@@ -49,7 +50,10 @@ const ogImage = new URL("/og.png", Astro.site);
 
     <header class="nav">
       <div class="nav__in">
-        <a class="nav__brand" href="#top">{profile.short} Legaspi</a>
+        <a class="nav__brand" href="#top">
+          <Mark class="nav__mk" />
+          <span class="nav__name">{profile.short} Legaspi</span>
+        </a>
         <nav class="nav__links" aria-label="Sections">
           {nav.map((n) => <a href={n.href}>{n.t}</a>)}
         </nav>

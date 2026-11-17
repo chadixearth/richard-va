@@ -1,0 +1,39 @@
+---
+/* The monogram. There was no logo, so this is one: an R and an L ruled inside
+   a hand-drawn plate, the same single stroke weight as the pen marks already
+   on the boards. It is drawn, not set, so it can animate the way a signature
+   does: six strokes in the order a hand would make them.
+
+   `draw` ties the strokes to the board's own scroll scrub (`[data-draw]`).
+   Without it the mark is static and motion.ts drives it directly, which is
+   what the running head needs because it is not inside a board.            */
+interface Props {
+  class?: string;
+  draw?: boolean;
+  label?: string;
+}
+const { class: cls = "", draw = false, label } = Astro.props;
+
+/* stroke order: plate, then R stem, bowl, leg, then L stem, foot */
+const strokes = [
+  "M7.6 10.6 C22 9.1 42 9.4 56 10.7 C57.2 24 57 41 56 53.4 C41 54.9 23 54.7 8 53.4 C6.9 40 7 24 7.6 10.6 Z",
+  "M19 45.4 V20.8",
+  "M19 20.8 H28.8 C33.6 20.8 35.8 23.6 35.8 27 C35.8 30.5 33.4 33.3 28.8 33.3 H19",
+  "M27.6 33.3 L35 45.4",
+  "M41.6 20.8 V45.4",
+  "M41.6 45.4 H52.4",
+];
+---
+
+<svg
+  class={`mk ${cls}`.trim()}
+  viewBox="0 0 64 64"
+  fill="none"
+  role={label ? "img" : "presentation"}
+  aria-label={label}
+  aria-hidden={label ? undefined : "true"}
+  focusable="false"
+>
+  {label && <title>{label}</title>}
+  {strokes.map((d) => <path d={d} pathLength="1" data-draw={draw ? "" : undefined} />)}
+</svg>

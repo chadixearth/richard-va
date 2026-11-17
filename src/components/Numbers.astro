@@ -42,6 +42,15 @@ const depth = { nine: 14, twentyone: 6, twelve: 10, eleven: 17 } as Record<strin
             <span class="num__fig">{s.n}</span>
             <span class="label num__l">{s.l}</span>
             <span class="num__rule" data-draw aria-hidden="true"></span>
+            {k === "nine" && (
+              <svg class="ink num__ring" viewBox="0 0 200 240" aria-hidden="true" focusable="false">
+                <path
+                  d="M104 14 C44 20 16 78 18 134 C20 194 60 228 104 228 C152 228 186 186 186 128 C186 68 152 20 92 16"
+                  pathLength="1"
+                  data-draw
+                />
+              </svg>
+            )}
           </li>
         );
       })}
@@ -105,6 +114,17 @@ const depth = { nine: 14, twentyone: 6, twelve: 10, eleven: 17 } as Record<strin
     line-height: 1.4;
   }
   /* a rule under each label, drawn in as the board is read */
+  /* the ring a hand would put round the figure that carries the board */
+  .num__ring {
+    left: -10%;
+    top: -6%;
+    width: 124%;
+    height: auto;
+    --ink-w: 2.6;
+    z-index: 0;
+    opacity: 0.85;
+  }
+
   .num__rule {
     justify-self: stretch;
     height: 2px;

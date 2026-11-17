@@ -2,6 +2,7 @@
 import { Image } from "astro:assets";
 import { profile } from "../data/content";
 import Rail from "./Rail.astro";
+import Mark from "./Mark.astro";
 import leaf from "../assets/photos/svc-3.jpg";
 import strata from "../assets/photos/svc-2.jpg";
 import cup from "../assets/photos/work-3.jpg";
@@ -36,6 +37,7 @@ const links = [
     </div>
 
     <div class="ft__plate">
+      <Mark class="ft__mk" draw />
       <p class="d1 ft__mark">{profile.name}</p>
       <p class="script ft__sign">Thank you</p>
     </div>
@@ -84,6 +86,12 @@ const links = [
   /* the plate is only as wide as the longest line, so the handwriting lands
      against the end of the name rather than the far edge of the sheet */
   .ft__plate { align-self: center; display: grid; }
+  .ft__mk {
+    width: clamp(48px, 5.4vw, 82px);
+    color: var(--pen);
+    margin-bottom: clamp(0.5rem, 1.1vw, 0.9rem);
+  }
+
   .ft__mark {
     font-family: var(--serif);
     font-weight: 900;

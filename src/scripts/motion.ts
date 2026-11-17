@@ -209,6 +209,10 @@ function revealSlide(slide: El) {
   gsap.set(g.copy, { y: 18, opacity: 0 });
   gsap.set(g.chips, { y: 10, opacity: 0, scale: 0.92 });
   gsap.set(marks, { "--swipe": "0%" });
+  /* the off-register pass: only the boards whose heading is set large enough
+     for the second colour to read (see the text-shadow rule in global.css) */
+  const offreg = slide.matches(".proj, .num, .ft") ? all(".d1", slide) : [];
+  gsap.set(offreg, { "--ex": "14px", "--ey": "-10px" });
   if (no) gsap.set(no, { opacity: 0, x: -12 });
 
   (one(".rv", slide) || slide).classList.add("ready");
@@ -260,6 +264,8 @@ function revealSlide(slide: El) {
   );
   if (marks.length)
     tl.to(marks, { "--swipe": "100%", duration: 0.85, ease: "power2.inOut" }, 0.55);
+  if (offreg.length)
+    tl.to(offreg, { "--ex": "0px", "--ey": "0px", duration: 1.25, ease: "elastic.out(1, 0.52)" }, 0.5);
 
   draws(slide);
   parallax(slide, props);
@@ -367,7 +373,7 @@ function cover() {
   gsap.set(bot1, { opacity: 0, yPercent: -18 });
   gsap.set(bot2, { opacity: 0, yPercent: 20 });
   gsap.set(art, { opacity: 0, y: 46 });
-  gsap.set(letters, { yPercent: 118, opacity: 0 });
+  gsap.set(letters, { yPercent: 118, opacity: 0, scaleY: 1.3, rotate: -5, transformOrigin: "50% 100%" });
   gsap.set(sign, { clipPath: CLIP_HIDDEN, y: 10 });
   gsap.set(lead, { opacity: 0, y: 14 });
   gsap.set([snap, snap2], { opacity: 0, y: -34, scale: 0.92 });
@@ -385,7 +391,19 @@ function cover() {
   tl.to(bot1, { opacity: 0.9, yPercent: 0, duration: 1.5 }, 0.05);
   tl.to(bot2, { opacity: 0.85, yPercent: 0, duration: 1.5 }, 0.15);
   tl.to(art, { opacity: 1, y: 0, duration: 1.3 }, 0.22);
-  tl.to(letters, { yPercent: 0, opacity: 1, duration: 0.95, stagger: 0.035 }, 0.42);
+  tl.to(
+    letters,
+    {
+      yPercent: 0,
+      opacity: 1,
+      scaleY: 1,
+      rotate: 0,
+      duration: 0.95,
+      ease: "back.out(1.6)",
+      stagger: 0.035,
+    },
+    0.42
+  );
   tl.to(sign, { clipPath: CLIP_SHOWN, y: 0, duration: 1.1, ease: "power2.inOut" }, 0.95);
   tl.to(notes, { strokeDashoffset: 0, duration: 0.5, ease: "power1.inOut", stagger: 0.07 }, 1.0);
   tl.to(snap, { opacity: 1, y: 0, scale: 1, duration: 1, ease: "back.out(2.2)" }, 1.05);
@@ -573,7 +591,7 @@ function hud(slides: El[]) {
       onToggle: (self) => {
         if (!self.isActive) return;
         if (n) n.textContent = String(i + 1).padStart(2, "0");
-        if (label) label.textContent = name;
+        if (label) scramble(label, name);
       },
     });
   });
@@ -588,6 +606,26 @@ function hud(slides: El[]) {
     });
 
   box.classList.add("is-on");
+}
+
+/* The HUD label is three to eight mono characters, so it can afford to
+   resolve rather than swap: four frames of noise, each pass locking one more
+   letter. Anything longer would read as a fault rather than a mechanism. */
+const NOISE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+function scramble(el: El, word: string) {
+  const w = word.toUpperCase();
+  let frame = 0;
+  const id = window.setInterval(() => {
+    frame += 1;
+    const locked = Math.min(w.length, Math.round((frame / 7) * w.length));
+    el.textContent =
+      w.slice(0, locked) +
+      [...w.slice(locked)].map(() => NOISE[(Math.random() * 26) | 0]).join("");
+    if (locked >= w.length) {
+      window.clearInterval(id);
+      el.textContent = w;
+    }
+  }, 34);
 }
 
 /* ── 9. nav marks the section you are reading ────────────────── */
@@ -605,6 +643,88 @@ function navState() {
   }
 }
 
+
+/* ── 9b. the mark is made, not placed ────────────────────────── */
+function logo() {
+  const mk = one(".nav__mk");
+  if (!mk) return;
+  const strokes = all("path", mk);
+  const draw = (delay: number) =>
+    gsap.fromTo(
+      strokes,
+      { "--draw": 0 },
+      { "--draw": 1, duration: 0.42, ease: "power1.inOut", stagger: 0.07, delay, overwrite: true }
+    );
+
+  draw(0.35);
+
+  const brand = mk.closest("a");
+  if (!brand) return;
+  let running = false;
+  const redraw = () => {
+    if (running) return;
+    running = true;
+    draw(0).eventCallback("onComplete", () => (running = false));
+  };
+  brand.addEventListener("pointerenter", redraw);
+  brand.addEventListener("focus", redraw);
+}
+
+/* ── 9c. a detail you can take with you ───────────────────────
+
+   This is a real control, so it is registered before the reduced-motion
+   gate: someone who switched motion off still gets the clipboard.        */
+function copies() {
+  const buttons = all(".copy");
+  if (!buttons.length) return;
+  root.classList.add("can-copy");
+  for (const btn of buttons) {
+    const value = btn.getAttribute("data-copy") || "";
+    const say = one(".copy__sr", btn);
+    let clear = 0;
+    btn.addEventListener("click", async () => {
+      let ok = true;
+      try {
+        await navigator.clipboard.writeText(value);
+      } catch {
+        ok = false;
+      }
+      if (!ok) {
+        /* older or non-secure contexts: the selection route still works */
+        const field = doc.createElement("textarea");
+        field.value = value;
+        field.setAttribute("readonly", "");
+        field.style.cssText = "position:fixed;top:-100px;opacity:0";
+        doc.body.appendChild(field);
+        field.select();
+        ok = doc.execCommand("copy");
+        field.remove();
+      }
+      if (!ok) {
+        /* the clipboard can be refused outright (an unfocused document, a
+           locked-down browser). Select the value instead of pretending: the
+           keyboard copy still works and the live region says so. */
+        const field = one(".ct__a", btn.parentElement as El) || btn.previousElementSibling;
+        if (field) {
+          const range = doc.createRange();
+          range.selectNodeContents(field);
+          const sel = window.getSelection();
+          sel?.removeAllRanges();
+          sel?.addRange(range);
+        }
+        if (say) say.textContent = "Select and press Control C to copy";
+        return;
+      }
+      btn.classList.add("is-done");
+      if (say) say.textContent = "Copied " + value;
+      window.clearTimeout(clear);
+      clear = window.setTimeout(() => {
+        btn.classList.remove("is-done");
+        if (say) say.textContent = "";
+      }, 1600);
+    });
+  }
+}
 
 /* ── 0. smooth scroll ────────────────────────────────────────────
 
@@ -643,6 +763,9 @@ function smooth() {
 
 /* ── boot ────────────────────────────────────────────────────── */
 function boot() {
+  /* a control, not an animation: it runs whatever the motion setting is */
+  copies();
+
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
     root.classList.remove("motion");
     return;
@@ -660,6 +783,7 @@ function boot() {
     dayRail();
     hud(slides);
     navState();
+    logo();
     velocity();
 
     ScrollTrigger.refresh();
