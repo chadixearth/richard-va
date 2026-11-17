@@ -2,7 +2,6 @@
 import { Image } from "astro:assets";
 import { profile } from "../data/content";
 import Rail from "./Rail.astro";
-import Scribble from "./Scribble.astro";
 import leaf from "../assets/photos/svc-3.jpg";
 import strata from "../assets/photos/svc-2.jpg";
 import cup from "../assets/photos/work-3.jpg";
@@ -30,7 +29,6 @@ const links = [
     <Image class="cut cut--bot bleed ft__bot2" src={strata} alt="" widths={[300, 600]} sizes="24vw" loading="lazy" data-drift="4" />
 
     <div class="ft__top">
-      <div class="ft__note" data-drift="10"><Scribble lines={4} seed={27} /></div>
       <figure class="snap ft__snap" data-drift="14">
         <Image src={cup} alt="" class="cut" widths={[260, 520]} sizes="16vw" />
         <figcaption class="script">End of deck</figcaption>
@@ -78,7 +76,6 @@ const links = [
     /* clear of the rail: nothing pasted may cross the running head */
     padding-top: clamp(1.5rem, 3.2vw, 2.4rem);
   }
-  .ft__note { width: clamp(110px, 13%, 168px); }
   .ft__snap { width: clamp(118px, 13.5%, 186px); margin: 0; rotate: 4deg; }
   .ft__snap :global(img) { aspect-ratio: 5 / 4; }
   .ft__snap figcaption { padding-top: 0.3rem; font-size: 0.9rem; text-align: center; }
@@ -171,7 +168,7 @@ const links = [
 
   @media (max-width: 900px) {
     .ft__in { grid-template-rows: none; }
-    .ft__bot, .ft__bot2, .ft__note { display: none; }
+    .ft__bot, .ft__bot2 { display: none; }
     .ft__top { justify-content: flex-start; }
     .ft__mark { white-space: normal; font-size: min(8.4rem, 11.4vw); }
     .ft__sign { justify-self: start; margin-right: 0; margin-top: 0.1em; }

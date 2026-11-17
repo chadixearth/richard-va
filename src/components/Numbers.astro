@@ -2,7 +2,6 @@
 import { Image } from "astro:assets";
 import { stats } from "../data/content";
 import Rail from "./Rail.astro";
-import Scribble from "./Scribble.astro";
 import leaf from "../assets/photos/svc-3.jpg";
 import cup from "../assets/photos/work-4.jpg";
 
@@ -34,8 +33,6 @@ const depth = { nine: 14, twentyone: 6, twelve: 10, eleven: 17 } as Record<strin
     <figure class="snap num__snap" data-drift="12">
       <Image class="cut" src={cup} alt="" widths={[220, 440]} sizes="16vw" />
     </figure>
-
-    <div class="num__scrib"><Scribble lines={4} seed={23} /></div>
 
     <ul class="num__list">
       {stats.map((s, i) => {
@@ -150,18 +147,6 @@ const depth = { nine: 14, twentyone: 6, twelve: 10, eleven: 17 } as Record<strin
     rotate: 5deg;
   }
   .num__snap :global(img) { aspect-ratio: 4 / 5; }
-  .num__scrib {
-    position: absolute;
-    z-index: 2;
-    left: 25%;
-    top: 70%;
-    width: clamp(84px, 9cqi, 140px);
-    rotate: -2deg;
-  }
-
-  @media (max-width: 1100px) {
-    .num__scrib { display: none; }
-  }
 
   @media (max-width: 860px) {
     .num__in { min-height: 0; padding-top: 1.8rem; margin-inline: 0; }
@@ -171,7 +156,7 @@ const depth = { nine: 14, twentyone: 6, twelve: 10, eleven: 17 } as Record<strin
     .num__item--nine .num__fig { font-size: clamp(3.6rem, 18vw, 6rem); }
     .num__item--twelve .num__fig { font-size: clamp(4rem, 20vw, 7rem); }
     .num__item--eleven .num__fig { font-size: clamp(3rem, 14vw, 5rem); }
-    .num__bot, .num__scrib { display: none; }
+    .num__bot { display: none; }
     .num__snap { position: static; width: 110px; margin-top: 1rem; }
   }
 </style>

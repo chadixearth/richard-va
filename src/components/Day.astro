@@ -2,7 +2,6 @@
 import { Image } from "astro:assets";
 import { runlog } from "../data/content";
 import Rail from "./Rail.astro";
-import Scribble from "./Scribble.astro";
 import inbox from "../assets/photos/work-1.jpg";
 import desk from "../assets/photos/work-3.jpg";
 import grain from "../assets/photos/svc-2.jpg";
@@ -36,16 +35,16 @@ const busiest = 2;
       <p class="body-s day__note">{runlog.note}</p>
     </header>
 
-    <div class="day__scrib" data-drift="7"><Scribble lines={4} seed={5} /></div>
-
-    <figure class="snap day__snap day__snap--a" data-drift="14">
-      <Image class="cut" src={inbox} alt="" widths={[220, 440]} sizes="18vw" />
-      <figcaption class="script" aria-hidden="true">{runlog.rows[0].t}</figcaption>
-    </figure>
-    <figure class="snap day__snap day__snap--b" data-drift="11">
-      <Image class="cut" src={desk} alt="" widths={[220, 440]} sizes="18vw" />
-      <figcaption class="script" aria-hidden="true">{runlog.rows[4].t}</figcaption>
-    </figure>
+    <div class="day__snaps">
+      <figure class="snap day__snap day__snap--a" data-drift="14">
+        <Image class="cut" src={inbox} alt="" widths={[220, 440]} sizes="18vw" />
+        <figcaption class="script" aria-hidden="true">{runlog.rows[0].t}</figcaption>
+      </figure>
+      <figure class="snap day__snap day__snap--b" data-drift="11">
+        <Image class="cut" src={desk} alt="" widths={[220, 440]} sizes="18vw" />
+        <figcaption class="script" aria-hidden="true">{runlog.rows[4].t}</figcaption>
+      </figure>
+    </div>
 
     <div class="day__tl">
       <span class="day__spine" data-draw aria-hidden="true"></span>
@@ -86,6 +85,7 @@ const busiest = 2;
     position: relative;
     z-index: 3;
     grid-column: 1;
+    grid-row: 1;
     align-self: start;
     display: grid;
     gap: clamp(0.6rem, 1.4cqi, 1.1rem);
@@ -212,26 +212,32 @@ const busiest = 2;
     border-radius: 2px;
   }
 
-  /* ── pinned snapshots, stacked in the left column ── */
-  .day__snap {
-    position: absolute;
+  /* ── pinned snapshots, stacked in the left column ──
+
+     They used to be absolutely positioned at `top: 57%`, which collided with
+     the note on any viewport where the heading set shorter than it does at
+     1440×900. They are a flow row pinned to the bottom of the left column
+     now, so the note's last line is always clear of them.                 */
+  .day__snaps {
+    grid-column: 1;
+    grid-row: 1;
     z-index: 4;
-    width: clamp(100px, min(14.5cqi, 21vh), 190px);
+    align-self: end;
+    justify-self: start;
+    display: flex;
+    align-items: flex-end;
+    gap: clamp(0.4rem, 1.6cqi, 1.4rem);
+    padding: 0 0 clamp(0.2rem, 1.4cqi, 1.2rem) 1.2%;
+  }
+  .day__snap {
+    position: relative;
+    width: clamp(100px, min(13.6cqi, 19.5vh), 178px);
     margin: 0;
   }
   .day__snap :global(img) { aspect-ratio: 4 / 5; }
   .day__snap figcaption { padding-top: 0.25rem; font-size: clamp(0.95rem, 1.5cqi, 1.3rem); text-align: center; }
-  .day__snap--a { left: 3%; top: 57%; rotate: -5deg; }
-  .day__snap--b { left: 19.5%; top: 61%; rotate: 6deg; }
-
-  .day__scrib {
-    position: absolute;
-    z-index: 2;
-    left: 28%;
-    top: 33%;
-    width: clamp(84px, 9cqi, 140px);
-    rotate: -3deg;
-  }
+  .day__snap--a { rotate: -5deg; }
+  .day__snap--b { rotate: 6deg; margin-bottom: clamp(0.3rem, 1.4cqi, 1.1rem); }
   .day__bot {
     left: -7%;
     bottom: -14%;
@@ -242,10 +248,6 @@ const busiest = 2;
     mask-image: radial-gradient(ellipse at 50% 50%, #000 42%, transparent 74%);
   }
 
-  @media (max-width: 1100px) {
-    .day__scrib { display: none; }
-  }
-
   @media (max-width: 860px) {
     .day__in { min-height: 0; display: block; margin-inline: 0; padding-top: 1.8rem; }
     .day__head { padding-left: 0; }
@@ -254,6 +256,6 @@ const busiest = 2;
     .day__row { grid-template-columns: 3.6rem minmax(0, 1fr); --step: 0rem; }
     .day__row--0, .day__row--1, .day__row--2, .day__row--3, .day__row--4, .day__row--5 { --step: 0rem; }
     .day__row::before { left: -1.4rem; width: 0.9rem; }
-    .day__snap, .day__scrib, .day__bot { display: none; }
+    .day__snaps, .day__bot { display: none; }
   }
 </style>

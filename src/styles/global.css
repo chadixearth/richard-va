@@ -598,18 +598,6 @@ button { font: inherit; color: inherit; }
 }
 .snap img { display: block; width: 100%; height: 100%; object-fit: cover; }
 
-/* A block of pen handwriting used as texture in a margin. The stroke must
-   not scale with the block, or a wide note turns into fat green waves. */
-.scrib { color: var(--pen); opacity: 0.8; pointer-events: none; }
-.scrib svg { display: block; width: 100%; height: auto; overflow: visible; }
-.scrib path {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.1;
-  stroke-linecap: round;
-  vector-effect: non-scaling-stroke;
-}
-
 /* Anything meant to run off the sheet. `height: auto` matters: Astro's
    <Image> emits a real `height` attribute, and without this a clipping
    given a width is stretched into a tall strip. */

@@ -43,12 +43,18 @@ from flipping the background.
 ## Assets
 - `src/assets/richard-cutout.png` — background-removed portrait (rembg, isnet-general-use).
 - `src/assets/richard-headshot.jpg` — headshot, pasted as a torn snapshot.
-- `src/assets/photos/*.jpg` — Unsplash photography (free licence). The source frames are
-  dark and moody, so they are never shown straight: `.cut` lifts a crop into a high-key
-  photocopy, `.cut--hard` pushes the figure to near-solid ink, and `.cut--bot` inverts
-  botanical frames so the leaves go dark and the background dissolves into the paper.
-  Every clipping is masked with a soft radial so it reads as torn, not as a rectangle
-  of stock photo.
+- `src/assets/photos/*.jpg` — Unsplash photography (free licence), standing in until
+  real work is shot. The source frames are dark and moody, so they are never shown
+  straight: each one is printed into the paper as a high-key photocopy, the figure is
+  pushed to near-solid ink, and the botanical frames are inverted so the leaves go dark
+  and the background dissolves into the sheet. Every clipping is masked with a soft
+  radial so it reads as torn, not as a rectangle of stock photo.
+- The exposures are **baked into the files**, not applied as a CSS `filter`, because
+  filtering megapixels on every repaint made the scroll expensive. The ungraded
+  originals live in `src/assets/.orig/`; `node scripts/bake-cuttings.mjs` regrades all
+  of them into `src/assets/`. To swap a picture, drop the new one into `.orig/` under
+  the filename of the slot it replaces and re-run that. `IMAGE-PROMPTS.md` says what
+  each slot is for and what to ask a generator for.
 - `public/og.png` — 1200×630 social card.
 
 ## Palette — matcha

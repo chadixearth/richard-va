@@ -2,7 +2,6 @@
 import { Image } from "astro:assets";
 import { process as steps } from "../data/content";
 import Rail from "./Rail.astro";
-import Scribble from "./Scribble.astro";
 import screen from "../assets/photos/work-1.jpg";
 import leaf from "../assets/photos/svc-3.jpg";
 
@@ -33,8 +32,6 @@ const arrows = [
       <span class="d1 method__word">How I</span>
       <span class="script method__sign">work</span>
     </h2>
-
-    <div class="method__note"><Scribble lines={4} seed={23} /></div>
 
     <svg class="method__line" viewBox="0 0 1000 600" preserveAspectRatio="none" aria-hidden="true" focusable="false">
       {arrows.map((d) => <path d={d} pathLength="1" data-draw />)}
@@ -126,7 +123,7 @@ const arrows = [
     font-size: 0.95rem;
     text-align: center;
   }
-  .method__line, .method__note, .method__leaf { display: none; }
+  .method__line, .method__leaf { display: none; }
 
   /* ── tablet and up: the weave, margin to margin ── */
   @media (min-width: 861px) {
@@ -144,16 +141,6 @@ const arrows = [
     }
     .method__word { font-size: clamp(2.8rem, 8.8vw, 8.4rem); }
     .method__sign { font-size: clamp(1.5rem, 4.2vw, 3.8rem); }
-
-    .method__note {
-      display: block;
-      position: absolute;
-      z-index: 2;
-      left: 61%;
-      bottom: 5%;
-      width: clamp(84px, 9%, 124px);
-      rotate: -2deg;
-    }
 
     /* the pen line: stroke-dashoffset runs against --draw, so each arrow is
        laid down as its board is read, the head last */

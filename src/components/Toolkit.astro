@@ -2,7 +2,6 @@
 import { Image } from "astro:assets";
 import { marquee } from "../data/content";
 import Rail from "./Rail.astro";
-import Scribble from "./Scribble.astro";
 import strata from "../assets/photos/svc-2.jpg";
 
 // Six rows, each carrying the whole stack but started at a different tool, so
@@ -30,7 +29,6 @@ const rowTools = (start: number) =>
   <div class="tk__wall rv">
     <div class="tk__top">
       <Image class="cut cut--bot bleed tk__bot" data-drift="5" src={strata} alt="" widths={[300, 600]} sizes="28vw" />
-      <div class="tk__note" data-drift="8"><Scribble lines={5} seed={31} /></div>
       <div class="tk__head">
         <h2 class="d1 tk__a">Tools</h2>
         <span class="script tk__b" data-drift="6">I run daily</span>
@@ -70,7 +68,7 @@ const rowTools = (start: number) =>
     padding: clamp(1rem, 1.8vw, 1.4rem) calc(var(--gut) * 0.4) 0;
   }
 
-  /* ── heading band: the word stands on the first rule, a leaf and a note beside it ── */
+  /* ── heading band: the word stands on the first rule, a leaf beside it ── */
   .tk__top { position: relative; flex: none; display: flex; align-items: flex-end; min-height: clamp(5rem, min(12.4vw, 19vh), 11rem); }
   .tk__head { position: relative; z-index: 3; display: flex; align-items: flex-end; gap: clamp(0.8rem, 2vw, 1.8rem); width: fit-content; margin: 0; }
   .tk__a { font-size: clamp(3rem, min(10.4vw, 16.4vh), 9.6rem); line-height: 0.8; margin-bottom: 0.03em; }
@@ -93,7 +91,6 @@ const rowTools = (start: number) =>
     rotate: 156deg;
     mask-image: radial-gradient(ellipse at 50% 50%, #000 42%, transparent 74%);
   }
-  .tk__note { position: absolute; z-index: 2; right: 30%; top: 20%; width: clamp(96px, 9%, 128px); rotate: 2deg; }
 
   /* ── ruled rows: they fill whatever the heading leaves ── */
   .tk__rows {
@@ -170,7 +167,6 @@ const rowTools = (start: number) =>
 
   @media (max-width: 860px) {
     .tk__wall { min-height: 0; margin-inline: 0; padding-inline: 0; }
-    .tk__note { display: none; }
     .tk__top { min-height: 0; padding-bottom: 0.4rem; }
     .tk__a { font-size: clamp(3rem, min(16vw, 25.60vh), 5rem); }
     .tk__b { position: static; display: block; font-size: 1.6rem; }

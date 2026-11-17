@@ -2,7 +2,6 @@
 import { Image } from "astro:assets";
 import { profile } from "../data/content";
 import Rail from "./Rail.astro";
-import Scribble from "./Scribble.astro";
 import cutout from "../assets/richard-cutout.png";
 import leaf from "../assets/photos/svc-3.jpg";
 import cup from "../assets/photos/work-4.jpg";
@@ -21,9 +20,6 @@ import desk from "../assets/photos/work-2.jpg";
   <div class="cover__in rv">
     <Image class="cut cut--bot bleed cover__bot1" src={leaf} alt="" widths={[300, 600]} sizes="24vw" loading="eager" data-drift="5" />
     <Image class="cut cut--bot bleed cover__bot2" src={leaf} alt="" widths={[320, 640]} sizes="26vw" loading="eager" data-drift="6" />
-
-    <div class="cover__note1" data-drift="9"><Scribble lines={6} seed={3} /></div>
-    <div class="cover__note2" data-drift="12"><Scribble lines={4} seed={19} /></div>
 
     <figure class="cover__art">
       <Image
@@ -179,9 +175,6 @@ import desk from "../assets/photos/work-2.jpg";
     text-align: center;
   }
 
-  .cover__note1 { position: absolute; z-index: 4; top: 1%; right: 0; width: clamp(118px, 13.5%, 176px); }
-  .cover__note2 { position: absolute; z-index: 4; left: 35%; top: 38%; width: clamp(92px, 10%, 134px); rotate: -2deg; }
-
   /* ── foot ── */
   .cover__foot {
     position: absolute;
@@ -228,7 +221,6 @@ import desk from "../assets/photos/work-2.jpg";
   @media (max-width: 1100px) {
     .cover__h { left: 38%; top: 6%; }
     .cover__lead { max-width: 24ch; top: 58%; }
-    .cover__note2 { display: none; }
   }
 
   /* phones: the collage stacks, the pieces that only work as bleed go away */
@@ -254,7 +246,7 @@ import desk from "../assets/photos/work-2.jpg";
     .cover__art { height: auto; justify-self: center; }
     .cover__art :global(.cover__cut) { width: min(230px, 54vw); height: auto; }
     .cover__snap { width: 130px; justify-self: start; rotate: -4deg; }
-    .cover__bot1, .cover__bot2, .cover__note1, .cover__note2 { display: none; }
+    .cover__bot1, .cover__bot2 { display: none; }
     .cover__cue { display: none; }
   }
 

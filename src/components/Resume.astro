@@ -2,7 +2,6 @@
 import { Image } from "astro:assets";
 import { experience, education } from "../data/content";
 import Rail from "./Rail.astro";
-import Scribble from "./Scribble.astro";
 import eduPhoto from "../assets/photos/svc-1.jpg";
 import leaf from "../assets/photos/svc-3.jpg";
 
@@ -25,8 +24,6 @@ import leaf from "../assets/photos/svc-3.jpg";
       <span class="script resume__sign">experience</span>
     </h2>
 
-    <div class="resume__note" data-drift="6"><Scribble lines={5} seed={11} /></div>
-
     <div class="resume__sheet">
       <span class="tape resume__tape" aria-hidden="true"></span>
       <ol class="resume__list">
@@ -45,17 +42,19 @@ import leaf from "../assets/photos/svc-3.jpg";
       </ol>
     </div>
 
-    <aside class="resume__edu" aria-label="Education">
-      <p class="label resume__edulbl">Education</p>
-      <p class="resume__degree">{education.degree}</p>
-      <p class="resume__school">{education.school}</p>
-      <p class="resume__school">{education.when}</p>
-    </aside>
+    <div class="resume__corner">
+      <aside class="resume__edu" aria-label="Education">
+        <p class="label resume__edulbl">Education</p>
+        <p class="resume__degree">{education.degree}</p>
+        <p class="resume__school">{education.school}</p>
+        <p class="resume__school">{education.when}</p>
+      </aside>
 
-    <figure class="snap resume__snap" data-drift="14">
-      <Image src={eduPhoto} alt="" class="cut" widths={[220, 440]} sizes="14vw" loading="lazy" />
-      <figcaption class="script">Class of 2026</figcaption>
-    </figure>
+      <figure class="snap resume__snap" data-drift="14">
+        <Image src={eduPhoto} alt="" class="cut" widths={[220, 440]} sizes="14vw" loading="lazy" />
+        <figcaption class="script">Class of 2026</figcaption>
+      </figure>
+    </div>
   </div>
 </section>
 
@@ -153,6 +152,7 @@ import leaf from "../assets/photos/svc-3.jpg";
     max-width: 62ch;
   }
 
+  .resume__corner { display: grid; gap: 1rem; justify-items: start; }
   .resume__edu { display: grid; gap: 0.2rem; }
   .resume__edulbl { margin: 0; color: var(--body); }
   .resume__degree {
@@ -173,7 +173,7 @@ import leaf from "../assets/photos/svc-3.jpg";
     font-size: 0.95rem;
     text-align: center;
   }
-  .resume__note, .resume__leaf, .resume__tape { display: none; }
+  .resume__leaf, .resume__tape { display: none; }
 
   /* ── tablet and up: one spread ── */
   @media (min-width: 861px) {
@@ -195,23 +195,22 @@ import leaf from "../assets/photos/svc-3.jpg";
       margin-right: 0.2em;
       font-size: clamp(1.5rem, min(3.4vw, 5.44vh), 3rem);
     }
-    .resume__note {
-      grid-area: title;
-      display: block;
-      align-self: end;
-      justify-self: start;
-      margin: 0 0 -0.7rem 16%;
-      width: clamp(84px, 7vw, 100px);
-      rotate: -3deg;
-    }
-    .resume__edu {
+    /* The photo used to be absolutely positioned over the spread and the
+       education block was pushed left by a 17vw margin to dodge it. On a
+       shorter viewport the photo reached past the header and sat on the first
+       role's text. The two are one unit now, so the photo cannot cross into
+       the ledger. */
+    .resume__corner {
       grid-area: edu;
       align-self: end;
-      width: clamp(13rem, 19vw, 17rem);
-      margin-right: clamp(0rem, 17vw, 17rem);
+      justify-self: end;
+      display: flex;
+      align-items: flex-end;
+      gap: clamp(0.6rem, 1.4vw, 1.4rem);
       position: relative;
       z-index: 4;
     }
+    .resume__edu { width: clamp(13rem, 19vw, 17rem); }
     .resume__degree { font-size: clamp(1.35rem, min(2.2vw, 3.52vh), 2rem); }
     .resume__school { font-size: clamp(0.92rem, 1.1vw, 1.05rem); }
     .resume__sheet { grid-area: sheet; rotate: 0.3deg; }
@@ -229,11 +228,7 @@ import leaf from "../assets/photos/svc-3.jpg";
     }
 
     .resume__snap {
-      position: absolute;
-      z-index: 5;
-      right: 3%;
-      top: 4.5%;
-      width: clamp(110px, 12vw, 170px);
+      width: clamp(96px, min(10.5vw, 16.8vh), 150px);
       rotate: 5deg;
     }
     .resume__leaf {

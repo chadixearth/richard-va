@@ -2,7 +2,6 @@
 import { Image } from "astro:assets";
 import { profile } from "../data/content";
 import Rail from "./Rail.astro";
-import Scribble from "./Scribble.astro";
 import headshot from "../assets/richard-headshot.jpg";
 import leaf from "../assets/photos/svc-3.jpg";
 
@@ -34,8 +33,6 @@ const rows = [
         <a class="btn" href={mailto}><span>Email me</span></a>
         <a class="btn btn--ghost" href={`tel:${profile.phoneHref}`}><span>{profile.phone}</span></a>
       </div>
-
-      <div class="ct__note" data-drift="11"><Scribble lines={3} seed={11} /></div>
     </div>
 
     <div class="ct__card">
@@ -96,7 +93,6 @@ const rows = [
     line-height: 1.5;
   }
   .ct__cta { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: auto; padding-top: clamp(1.2rem, 2.4vw, 1.8rem); }
-  .ct__note { width: clamp(120px, 15%, 190px); margin-top: clamp(1rem, 2vw, 1.6rem); }
 
   /* the right column is a contact sheet, not a card: the photo is pasted on
      top of a plain ruled list, the way a print-out would be */
@@ -162,6 +158,6 @@ const rows = [
     .ct__in { grid-template-columns: minmax(0, 1fr); }
     /* one column: the snapshot sits above the list instead of on top of it */
     .ct__pol { margin: 0 auto 0.9rem 0; }
-    .ct__bot, .ct__note { display: none; }
+    .ct__bot { display: none; }
   }
 </style>

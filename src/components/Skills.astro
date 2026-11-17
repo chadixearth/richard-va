@@ -2,7 +2,6 @@
 import { Image } from "astro:assets";
 import { services } from "../data/content";
 import Rail from "./Rail.astro";
-import Scribble from "./Scribble.astro";
 import leaf from "../assets/photos/svc-3.jpg";
 import strata from "../assets/photos/svc-2.jpg";
 
@@ -10,7 +9,7 @@ import strata from "../assets/photos/svc-2.jpg";
    row, and they own the whole height of the sheet. A huge pen numeral hangs
    in the left margin, the serif title and blurb sit beside it, and the detail
    runs in two columns on the right. The heading band above them carries a
-   tea-leaf clipping, a band of strata and one block of handwriting.
+   tea-leaf clipping and a band of strata.
    Pointing at (or tabbing into) a service brings it forward and lets the
    other two recede; its pen rule is drawn by scroll (data-draw) and a
    highlighter band sweeps under it on hover. */
@@ -27,7 +26,6 @@ import strata from "../assets/photos/svc-2.jpg";
       </h2>
       <Image class="cut cut--bot bleed skills__bot1" data-drift="5" src={leaf} alt="" widths={[300, 600]} sizes="22vw" />
       <Image class="cut cut--bot bleed skills__bot2" data-drift="4" src={strata} alt="" widths={[300, 600]} sizes="22vw" />
-      <div class="skills__note"><Scribble lines={5} seed={11} /></div>
     </div>
 
     <div class="skills__list">
@@ -94,7 +92,6 @@ import strata from "../assets/photos/svc-2.jpg";
   }
   .skills__bot1 { top: -2%; right: -3%; width: clamp(170px, 19%, 270px); height: clamp(100px, min(11vw, 17vh), 170px); rotate: 192deg; }
   .skills__bot2 { top: 6%; right: 20%; width: clamp(170px, 17%, 250px); height: clamp(90px, min(9.4vw, 14.5vh), 140px); rotate: -6deg; }
-  .skills__note { position: absolute; z-index: 2; right: 40%; top: 18%; width: clamp(96px, 9%, 128px); rotate: -3deg; }
 
   /* ── the contents list: three equal rows that own the rest of the sheet ── */
   .skills__list {
@@ -193,7 +190,6 @@ import strata from "../assets/photos/svc-2.jpg";
     .skills__no { font-size: clamp(3.4rem, min(9vw, 14.40vh), 5.6rem); }
     .skills__items { grid-column: 1 / -1; }
     .skills__bot1 { opacity: 0.6; }
-    .skills__note { display: none; }
   }
   @media (max-width: 860px) {
     .skills__bot2 { display: none; }
