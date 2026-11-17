@@ -1,0 +1,188 @@
+---
+import { Image } from "astro:assets";
+import { work, stats } from "../data/content";
+import Rail from "./Rail.astro";
+import leaf from "../assets/photos/svc-3.jpg";
+import w2 from "../assets/photos/work-2.jpg";
+
+/* Composition note: the four builds are clippings pinned to one page, and the
+   page is the whole sheet. They are wide, they overlap left to right like a
+   hand of cards, and they are staggered so the first sits at the top margin
+   and the last is dropped to the bottom margin. The head carries the title,
+   the intro, a snapshot and the voice-agent count written in the pen.
+   Pointing at (or tabbing to) a clipping straightens it, lifts it and puts it
+   on top of the pile, the way you pick a photograph out of a stack. */
+const voice = stats.find((s) => s.n === "12");
+const tape = [false, true, true, false];
+---
+
+<section class="slide proj" id="projects" aria-label="Previous projects">
+  <Rail no="05" name="Projects" />
+
+  <div class="proj__in rv">
+    <header class="proj__head">
+      <h2 class="proj__title">
+        <span class="script proj__pre">Previous</span>
+        <span class="d1 proj__word">Projects</span>
+      </h2>
+      <div class="proj__side">
+        <div class="snap proj__snap" data-drift="14">
+          <Image class="cut" src={w2} alt="" widths={[220, 440]} sizes="14vw" />
+        </div>
+        <div class="proj__words">
+          <p class="body-s proj__intro">Four builds from inside one company, from voice interviews to outbound prospecting.</p>
+        </div>
+      </div>
+    </header>
+
+    <div class="proj__page">
+      <Image class="cut cut--bot bleed proj__bot" data-drift="5" src={leaf} alt="" widths={[300, 600]} sizes="28vw" />
+      {voice && (
+        <p class="proj__stat" data-drift="8">
+          <span class="script proj__n">{voice.n}</span>
+          <span class="script proj__l">{voice.l}</span>
+        </p>
+      )}
+
+      {work.map((c, i) => (
+        <article class={`proj__clip proj__clip--${i + 1}`}>
+          {tape[i] && <span class="tape proj__tape" data-drift="10" aria-hidden="true"></span>}
+          <p class="label proj__label">{c.label}</p>
+          <h3 class="d3 proj__t">{c.title}</h3>
+          <p class="body-s proj__body">{c.body}</p>
+          <ul class="proj__tools" aria-label="Tools">
+            {c.tools.map((t) => <li>{t}</li>)}
+          </ul>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .proj {
+    --sp: clamp(1.4rem, 3vw, 2.8rem);
+    justify-content: flex-start;
+  }
+  @media (min-width: 900px) and (max-height: 850px) {
+    .proj { --sp: clamp(1.1rem, 2.1vw, 1.9rem); }
+  }
+
+  /* The wrapper owns the whole content box of the sheet and runs a little
+     past the rail's margins; padding puts the type back on them while the
+     clippings use the extra room. */
+  .proj__in {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: clamp(0.4rem, 1vw, 0.9rem);
+    min-height: calc(var(--board, 0px) - var(--sp) * 2);
+    padding: clamp(1.2rem, 2.4vw, 1.9rem) calc(var(--gut) * 0.4) 0;
+  }
+
+  /* ── head: "Previous" in the pen above the word; intro, stat and snapshot beside it ── */
+  .proj__head { position: relative; z-index: 4; display: flex; align-items: flex-end; justify-content: space-between; gap: clamp(1rem, 2.6vw, 2.4rem); }
+  .proj__title { display: grid; justify-items: start; margin: 0; flex: none; }
+  .proj__pre {
+    display: block;
+    margin: 0 0 -0.2em 0.1em;
+    font-size: clamp(1.5rem, min(3.4vw, 5.44vh), 3rem);
+    rotate: -3deg;
+    transform-origin: 0 100%;
+  }
+  .proj__word { font-size: clamp(2.8rem, min(8.4vw, 13.4vh), 8rem); line-height: 0.84; white-space: nowrap; }
+
+  .proj__side { display: flex; align-items: flex-end; gap: clamp(0.9rem, 2vw, 1.8rem); min-width: 0; }
+  .proj__snap { flex: none; width: clamp(96px, min(12.4vw, 19vh), 180px); rotate: 5deg; }
+  .proj__snap :global(img) { aspect-ratio: 1 / 1; }
+  .proj__words { display: grid; gap: 0.5rem; min-width: 0; padding-bottom: 0.3rem; }
+  .proj__intro { max-width: 28ch; color: var(--body); }
+  .proj__stat { position: absolute; z-index: 2; top: 1%; right: 3%; display: grid; justify-items: start; rotate: -5deg; transform-origin: 0 100%; }
+  .proj__n { font-size: clamp(4rem, min(7.6vw, 12.16vh), 7rem); line-height: 0.8; }
+  .proj__l { font-size: clamp(1.3rem, min(2.2vw, 3.52vh), 2rem); line-height: 0.95; max-width: 9ch; }
+
+  /* ── the pinned page ── */
+  .proj__page { position: relative; z-index: 3; display: flex; align-items: flex-start; min-height: 0; }
+
+  .proj__bot {
+    left: 4%;
+    bottom: -14%;
+    width: clamp(220px, 24%, 340px);
+    height: clamp(120px, 11vw, 170px);
+    object-fit: cover;
+    rotate: -12deg;
+    opacity: 0.7;
+    mask-image: radial-gradient(ellipse at 50% 50%, #000 42%, transparent 74%);
+  }
+
+  .proj__clip {
+    position: relative;
+    min-width: 0;
+    padding: 1.5rem 1.4rem 1.3rem;
+    background: #fbf9f2;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    box-shadow: 0 12px 24px -20px rgba(14, 21, 9, 0.55);
+    outline-offset: 4px;
+    transition: rotate 0.5s var(--ease), translate 0.5s var(--ease), scale 0.5s var(--ease), box-shadow 0.5s var(--ease);
+  }
+  .proj__clip--1 { flex: 0 0 26.6%; padding-right: 2.6rem; rotate: -1.2deg; z-index: 1; }
+  .proj__clip--2 { flex: 0 0 26.6%; padding-right: 2.6rem; margin-left: -2.2%; margin-top: 2.6rem; rotate: 1.2deg; z-index: 2; }
+  .proj__clip--3 { flex: 0 0 26.6%; padding-inline: 2.6rem 2.6rem; margin-left: -2.2%; margin-top: 0.6rem; rotate: -0.7deg; z-index: 1; }
+  .proj__clip--4 { flex: 0 0 26.6%; margin-left: -2.2%; align-self: flex-end; rotate: 1.5deg; z-index: 2; }
+
+  .proj__tape { top: -0.7rem; left: 50%; margin-left: -37px; rotate: -4deg; }
+  .proj__clip--3 .proj__tape { left: auto; right: 12%; margin-left: 0; rotate: 5deg; }
+
+  .proj__label { color: var(--muted); margin-bottom: 0.4rem; }
+  .proj__t {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: clamp(1.2rem, min(1.8vw, 2.88vh), 1.7rem);
+    line-height: 1.14;
+    letter-spacing: 0;
+    color: var(--ink);
+  }
+  .proj__body { margin-top: 0.65rem; font-size: clamp(0.86rem, min(1.04vw, 1.66vh), 1rem); line-height: 1.5; color: var(--body); }
+
+  /* tools: set as a run of names with slashes, not a row of chips */
+  .proj__tools {
+    margin-top: 0.8rem;
+    padding-top: 0.55rem;
+    border-top: 1px solid var(--rule);
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    line-height: 1.6;
+    color: var(--muted);
+  }
+  .proj__tools li { display: inline; }
+  .proj__tools li + li::before { content: " / "; }
+
+  /* ── signature: pick the clipping out of the pile ── */
+  .proj__clip:hover,
+  .proj__clip:focus-visible {
+    z-index: 8;
+    rotate: 0deg;
+    translate: 0 -0.7rem;
+    scale: 1.035;
+    box-shadow: 0 26px 38px -22px rgba(14, 21, 9, 0.7);
+  }
+
+  @media (max-width: 1100px) {
+    .proj__in { min-height: 0; grid-template-rows: auto; }
+    .proj__head { flex-wrap: wrap; }
+    .proj__stat { position: static; flex: 0 0 100%; grid-auto-flow: column; justify-content: start; align-items: end; gap: 0.6rem; }
+    .proj__page { flex-wrap: wrap; gap: 1.6rem 3%; }
+    .proj__clip--1, .proj__clip--2, .proj__clip--3, .proj__clip--4 { flex: 0 0 48.5%; margin: 0; align-self: auto; }
+    .proj__clip--2, .proj__clip--4 { margin-top: 1.4rem; }
+    .proj__bot { display: none; }
+  }
+  @media (max-width: 760px) {
+    .proj__in { margin-inline: 0; padding-inline: 0; }
+    .proj__head { flex-direction: column; align-items: flex-start; gap: 0.8rem; }
+    .proj__word { white-space: normal; }
+    .proj__snap { display: none; }
+    .proj__clip--1, .proj__clip--2, .proj__clip--3, .proj__clip--4 { flex-basis: 100%; rotate: 0deg; margin-top: 0; }
+  }
+</style>

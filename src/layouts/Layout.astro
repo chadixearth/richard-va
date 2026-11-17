@@ -1,0 +1,75 @@
+---
+import "../styles/global.css";
+import { profile } from "../data/content";
+
+const title = `${profile.name} · ${profile.role}`;
+const description = profile.tagline;
+const nav = [
+  { href: "#about", t: "About" },
+  { href: "#skills", t: "Skills" },
+  { href: "#projects", t: "Projects" },
+  { href: "#resume", t: "Resume" },
+];
+
+/* Facebook, LinkedIn and Slack will not resolve a relative og:image, so the
+   card is published as an absolute URL off `site` in astro.config. */
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL("/og.png", Astro.site);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#1A2D10" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={ogImage} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Caveat:wght@500..700&family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..900,0..100,0..1;1,9..144,300..900,0..100,0..1&display=swap"
+    />
+  </head>
+
+  <body>
+    <a class="sr" href="#deck">Skip to content</a>
+
+    <header class="nav">
+      <div class="nav__in">
+        <a class="nav__brand" href="#top">{profile.short} Legaspi</a>
+        <nav class="nav__links" aria-label="Sections">
+          {nav.map((n) => <a href={n.href}>{n.t}</a>)}
+        </nav>
+        <a class="btn nav__cta" href="#contact"><span>Hire me</span></a>
+      </div>
+    </header>
+
+    <main id="deck" class="deck">
+      <slot />
+    </main>
+
+    <aside class="hud" aria-hidden="true">
+      <span class="hud__n">01</span>
+      <span class="hud__rail"><span class="hud__fill"></span></span>
+      <span class="hud__total">11</span>
+      <span class="hud__name">COVER</span>
+    </aside>
+
+    <script>
+      import "../scripts/motion";
+    </script>
+  </body>
+</html>

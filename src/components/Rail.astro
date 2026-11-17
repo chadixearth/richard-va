@@ -1,0 +1,19 @@
+---
+/* The rail is the deck's identity motif (R-20): the same three pen-written
+   micro-labels run across the top of every board, the way a printed
+   presentation carries a running head. It also carries the board index, so
+   no separate index tab is needed and nothing sits on top of a photograph. */
+import { profile } from "../data/content";
+
+interface Props {
+  no: string;
+  name: string;
+}
+const { no, name } = Astro.props;
+---
+
+<div class="rail">
+  <span>{no} / {name}</span>
+  <span>Portfolio Presentation</span>
+  <span>By {profile.name}</span>
+</div>

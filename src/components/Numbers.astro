@@ -1,0 +1,177 @@
+---
+import { Image } from "astro:assets";
+import { stats } from "../data/content";
+import Rail from "./Rail.astro";
+import Scribble from "./Scribble.astro";
+import leaf from "../assets/photos/svc-3.jpg";
+import cup from "../assets/photos/work-4.jpg";
+
+/* each figure gets its own size, its own spot on the sheet and its own depth
+   under the cursor (`data-drift`): the big 21 barely moves, the small 11
+   travels furthest, so the scatter parallaxes */
+const place = ["nine", "twentyone", "twelve", "eleven"];
+const depth = { nine: 14, twentyone: 6, twelve: 10, eleven: 17 } as Record<string, number>;
+
+/* Composition note (R-31, density pass): four numerals set as large as the
+   sheet will hold, dropped where a hand would put them and running off its
+   edges. The 21 is the biggest thing on the board; a leaf clipping lies over
+   the seam between the 21 and the 12. The heading takes the top-left with one
+   snapshot pinned top-right, and a rule under each label draws in as the
+   board is read. */
+---
+
+<section class="slide num" id="numbers" aria-label="By the numbers">
+  <Rail no="06" name="Numbers" />
+
+  <div class="num__in rv">
+    <h2 class="num__head">
+      <span class="d1 num__by">By the</span>
+      <span class="script num__script">numbers</span>
+    </h2>
+
+    <Image class="cut cut--bot bleed num__bot" data-drift="5" src={leaf} alt="" widths={[320, 640]} sizes="30vw" />
+
+    <figure class="snap num__snap" data-drift="12">
+      <Image class="cut" src={cup} alt="" widths={[220, 440]} sizes="16vw" />
+    </figure>
+
+    <div class="num__scrib"><Scribble lines={4} seed={23} /></div>
+
+    <ul class="num__list">
+      {stats.map((s, i) => {
+        const k = place[i] ?? "nine";
+        return (
+          <li class={`num__item num__item--${k}`} data-drift={depth[k]}>
+            <span class="num__fig">{s.n}</span>
+            <span class="label num__l">{s.l}</span>
+            <span class="num__rule" data-draw aria-hidden="true"></span>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .num { justify-content: flex-start; }
+
+  .num__in {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    container-type: inline-size;
+    min-height: clamp(400px, 64vh, 600px);
+    padding-top: clamp(1.2rem, 2.6vw, 2.2rem);
+  }
+
+  .num__head {
+    position: relative;
+    z-index: 3;
+    display: grid;
+    justify-items: start;
+    width: max-content;
+    font-size: 0;
+    line-height: 0;
+  }
+  .num__by { font-size: clamp(2.4rem, 8cqi, 6.6rem); line-height: 0.86; }
+  .num__script {
+    margin-top: -0.06em;
+    margin-left: 1.3em;
+    font-size: clamp(2.1rem, 5.4cqi, 4.4rem);
+    rotate: -3deg;
+    transform-origin: 0 50%;
+  }
+
+  /* the list is only a semantic wrapper; its items are placed on the sheet */
+  .num__list { list-style: none; margin: 0; padding: 0; }
+  .num__item {
+    position: absolute;
+    z-index: 4;
+    display: grid;
+    justify-items: start;
+    gap: 0.35rem;
+    min-width: 7rem;
+  }
+
+  .num__fig {
+    display: block;
+    font-family: var(--serif);
+    font-weight: 900;
+    line-height: 0.8;
+    letter-spacing: -0.03em;
+    color: var(--pen);
+  }
+  .num__l {
+    max-width: 19ch;
+    color: var(--ink);
+    font-size: clamp(0.82rem, 1.3cqi, 1.1rem);
+    line-height: 1.4;
+  }
+  /* a rule under each label, drawn in as the board is read */
+  .num__rule {
+    justify-self: stretch;
+    height: 2px;
+    background: var(--pen);
+    transform-origin: 0 50%;
+    transform: scaleX(var(--draw));
+  }
+
+  /* the 21 is the biggest thing on the sheet, the 11 the smallest */
+  .num__item--twentyone { left: 30%; top: 1%; }
+  .num__item--twentyone .num__fig { font-size: clamp(7rem, min(34cqi, 50vh), 26rem); }
+
+  .num__item--nine { left: 2%; top: 46%; }
+  .num__item--nine .num__fig { font-size: clamp(5rem, min(31cqi, 45vh), 23rem); }
+
+  .num__item--twelve { right: 1.5%; top: 40%; }
+  .num__item--twelve .num__fig { font-size: clamp(5rem, min(30cqi, 43vh), 22rem); }
+
+  .num__item--eleven { left: 40%; top: 62%; }
+  .num__item--eleven .num__fig { font-size: clamp(3.4rem, min(22cqi, 32vh), 16rem); }
+
+  /* pasted pieces; the leaf lies across the seam of the 21 and the 12 */
+  .num__bot {
+    z-index: 5;
+    left: 45%;
+    top: 18%;
+    width: clamp(150px, 24cqi, 340px);
+    height: auto;
+    opacity: 0.7;
+    rotate: 200deg;
+    mask-image: radial-gradient(ellipse at 50% 50%, #000 42%, transparent 74%);
+  }
+  .num__snap {
+    position: absolute;
+    z-index: 4;
+    right: 3%;
+    top: 3%;
+    width: clamp(110px, 15cqi, 210px);
+    margin: 0;
+    rotate: 5deg;
+  }
+  .num__snap :global(img) { aspect-ratio: 4 / 5; }
+  .num__scrib {
+    position: absolute;
+    z-index: 2;
+    left: 25%;
+    top: 70%;
+    width: clamp(84px, 9cqi, 140px);
+    rotate: -2deg;
+  }
+
+  @media (max-width: 1100px) {
+    .num__scrib { display: none; }
+  }
+
+  @media (max-width: 860px) {
+    .num__in { min-height: 0; padding-top: 1.8rem; margin-inline: 0; }
+    .num__list { display: grid; grid-template-columns: 1fr 1fr; gap: 1.6rem 1rem; margin-top: 1.6rem; }
+    .num__item { position: static; }
+    .num__item--twentyone .num__fig { font-size: clamp(5rem, 24vw, 8rem); }
+    .num__item--nine .num__fig { font-size: clamp(3.6rem, 18vw, 6rem); }
+    .num__item--twelve .num__fig { font-size: clamp(4rem, 20vw, 7rem); }
+    .num__item--eleven .num__fig { font-size: clamp(3rem, 14vw, 5rem); }
+    .num__bot, .num__scrib { display: none; }
+    .num__snap { position: static; width: 110px; margin-top: 1rem; }
+  }
+</style>

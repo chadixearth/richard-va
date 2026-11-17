@@ -1,0 +1,226 @@
+---
+import { Image } from "astro:assets";
+import { profile, about } from "../data/content";
+import Rail from "./Rail.astro";
+import Scribble from "./Scribble.astro";
+import headshot from "../assets/richard-headshot.jpg";
+import leaf from "../assets/photos/svc-3.jpg";
+
+const [lead, ...restWords] = about.title.split(" who ");
+const tail = restWords.length ? "who " + restWords.join(" who ") : "";
+const leadWords = lead.split(" ");
+const word = leadWords.pop();
+const pre = leadWords.join(" ");
+const [lede, ...body] = about.paras;
+
+/* Composition note (R-31, density pass): the sheet is one big grid. The
+   photocopied snapshot takes the whole left third and its corner rides into
+   the text column; the heavy word spans that column edge to edge, the lede
+   runs full width under it and the two shorter paragraphs sit side by side.
+   The four strengths are not a footnote any more: they are a ruled row along
+   the bottom margin, each rule drawing in as the board is read. */
+---
+
+<section class="slide about" id="about">
+  <Rail no="02" name="About" />
+
+  <div class="about__in rv">
+    <Image class="cut cut--bot bleed about__bot" data-drift="5" src={leaf} alt="" widths={[320, 640]} sizes="28vw" />
+
+    <div class="about__note" data-drift="8"><Scribble lines={5} seed={11} /></div>
+
+    <figure class="snap about__photo" data-drift="14">
+      <span class="tape about__tape" aria-hidden="true"></span>
+      <Image
+        class="cut"
+        src={headshot}
+        alt={`${profile.name}, ${profile.role}`}
+        widths={[240, 400, 600]}
+        sizes="(max-width: 860px) 60vw, 30vw"
+      />
+      <figcaption class="script">{profile.name}</figcaption>
+    </figure>
+
+    <div class="about__col">
+      <h2 class="about__h">
+        <span class="about__pre">{pre}</span>
+        <span class="d1 about__word">{word}</span>
+        <span class="script about__tail">{tail}</span>
+      </h2>
+
+      <div class="about__copy">
+        <p class="lede">{lede}</p>
+        <div class="about__cols">
+          {body.map((p) => <p class="body-s about__p">{p}</p>)}
+        </div>
+      </div>
+    </div>
+
+    <ul class="about__marks" data-draw>
+      {about.strengths.map((s, i) => <li class="label" style={`--i:${i}`}>{s}</li>)}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .about { justify-content: flex-start; }
+
+  /* one grid for the whole sheet: composition on top, strengths along the foot.
+     The wrapper bleeds a little into the side gutters so it reads as the full
+     width of the paper; the rail above it is untouched. `cqi` ties every size
+     to the sheet rather than the window. */
+  .about__in {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    container-type: inline-size;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    row-gap: clamp(0.9rem, 2.4cqi, 1.8rem);
+    min-height: clamp(400px, 66vh, 620px);
+    padding-top: clamp(1.2rem, 2.6vw, 2.2rem);
+  }
+
+  /* ── the text column sits right of the photograph ── */
+  .about__col {
+    position: relative;
+    z-index: 3;
+    grid-row: 1;
+    grid-column: 1;
+    margin-left: 30%;
+    padding-right: 1%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-width: 0;
+  }
+
+  .about__h { display: grid; margin: 0; }
+  .about__pre {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: clamp(1.3rem, 3.1cqi, 2.3rem);
+    line-height: 1;
+    margin-left: 0.15em;
+    color: var(--pen);
+  }
+  .about__word {
+    font-size: clamp(2.6rem, min(12.4cqi, 15.5vh), 10rem);
+    line-height: 0.84;
+    white-space: nowrap;
+    margin-left: -0.04em;
+  }
+  .about__tail {
+    margin-top: -0.1em;
+    margin-left: 10.4em;
+    white-space: nowrap;
+    font-size: clamp(1.8rem, 4.2cqi, 3.4rem);
+    rotate: -3deg;
+    transform-origin: 0 50%;
+  }
+
+  .about__copy { display: grid; gap: clamp(0.7rem, min(2.2cqi, 2.4vh), 1.6rem); align-content: start; margin-left: 7.5%; }
+  .about__copy .lede {
+    max-width: 52ch;
+    color: var(--ink);
+    font-size: clamp(1.1rem, min(2.05cqi, 2.8vh), 1.75rem);
+  }
+  .about__cols {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 clamp(1.4rem, 3.4cqi, 3rem);
+    max-width: 80%;
+  }
+  .about__p { color: var(--body); font-size: clamp(0.9rem, min(1.28cqi, 1.75vh), 1.1rem); }
+
+  /* the four strengths: a ruled row along the foot of the sheet. Each rule
+     draws in with the read (`--draw`, scrubbed by motion.ts). */
+  .about__marks {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    z-index: 3;
+    grid-row: 2;
+    grid-column: 1;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0 clamp(1.2rem, 2.8cqi, 2.4rem);
+    color: var(--ink);
+  }
+  .about__marks li {
+    position: relative;
+    padding-top: 0.8rem;
+    font-size: clamp(0.76rem, 1.02cqi, 0.9rem);
+    line-height: 1.5;
+    text-wrap: balance;
+  }
+  .about__marks li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 2px;
+    background: var(--pen);
+    transform-origin: 0 50%;
+    transform: scaleX(clamp(0, calc((var(--draw) - var(--i) * 0.07) * 4), 1));
+  }
+
+  /* ── pasted pieces ── */
+  .about__photo {
+    position: relative;
+    z-index: 2;
+    grid-row: 1;
+    grid-column: 1;
+    align-self: start;
+    justify-self: start;
+    width: min(33%, 42vh);
+    margin: 1.2% 0 0 0;
+    rotate: -4.5deg;
+  }
+  .about__photo :global(img) { aspect-ratio: 4 / 5; object-position: 50% 20%; }
+  .about__photo figcaption { padding-top: 0.3rem; font-size: clamp(1rem, 1.7cqi, 1.4rem); text-align: center; }
+  .about__tape { top: -0.8rem; left: 50%; translate: -50% 0; rotate: 3deg; }
+
+  .about__note {
+    position: absolute;
+    z-index: 2;
+    right: 6%;
+    top: 0.5%;
+    width: clamp(90px, 9.5cqi, 150px);
+    rotate: 2deg;
+  }
+
+  .about__bot {
+    right: -4%;
+    top: 55%;
+    width: clamp(190px, 21cqi, 320px);
+    height: auto;
+    rotate: -24deg;
+    opacity: 0.85;
+    mask-image: radial-gradient(ellipse at 50% 50%, #000 42%, transparent 74%);
+  }
+
+  @media (max-width: 1100px) {
+    .about__note { display: none; }
+    .about__marks { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.9rem 1.6rem; }
+  }
+
+  @media (max-width: 860px) {
+    .about__in {
+      min-height: 0;
+      grid-template-rows: none;
+      margin-inline: 0;
+      row-gap: 1.2rem;
+      padding-top: 1.8rem;
+    }
+    .about__col { margin-left: 0; padding-right: 0; grid-row: auto; display: block; }
+    .about__copy { margin: 1.1rem 0 0; }
+    .about__cols { grid-template-columns: 1fr; max-width: none; gap: 0.85rem; }
+    .about__photo { grid-row: auto; width: min(230px, 60vw); rotate: -3deg; margin: 0 0 0 0.4rem; }
+    .about__tail { margin-left: 22%; }
+    .about__marks { grid-row: auto; grid-template-columns: 1fr; }
+    .about__bot, .about__note { display: none; }
+  }
+</style>

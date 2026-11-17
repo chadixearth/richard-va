@@ -1,0 +1,229 @@
+---
+import { Image } from "astro:assets";
+import { process as steps } from "../data/content";
+import Rail from "./Rail.astro";
+import Scribble from "./Scribble.astro";
+import screen from "../assets/photos/work-1.jpg";
+import leaf from "../assets/photos/svc-3.jpg";
+
+/* Composition note (R-31): the four steps weave down the sheet from margin
+   to margin (right, left, right, left), each numeral at its own size. One pen
+   line runs from step to step with an arrowhead at each landing, and it is
+   drawn as the board is read (data-draw), so the arrow is a reading order
+   rather than a decoration. The numerals drift a few pixels with the cursor
+   so the zigzag has depth. */
+
+/* Each arrow is one continuous stroke (curve, then the arrowhead retraced
+   from the tip), in a 1000 x 600 box that maps to the board. One subpath, so
+   a single dash offset draws the head last. */
+const arrows = [
+  "M700 112 C660 165 600 150 540 192 L570 188 L540 192 L554 165",
+  "M300 262 C360 310 450 300 568 352 L549 328 L568 352 L538 354",
+  "M650 425 C610 470 530 455 445 500 L475 500 L445 500 L462 475",
+];
+---
+
+<section class="slide method" id="method" aria-labelledby="method-title">
+  <Rail no="09" name="Method" />
+
+  <div class="method__in rv">
+    <Image class="cut cut--bot bleed method__leaf" data-drift="5" src={leaf} alt="" widths={[300, 600]} sizes="24vw" loading="lazy" />
+
+    <h2 id="method-title" class="method__h">
+      <span class="d1 method__word">How I</span>
+      <span class="script method__sign">work</span>
+    </h2>
+
+    <div class="method__note"><Scribble lines={4} seed={23} /></div>
+
+    <svg class="method__line" viewBox="0 0 1000 600" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+      {arrows.map((d) => <path d={d} pathLength="1" data-draw />)}
+    </svg>
+
+    <figure class="snap method__snap" data-drift="12">
+      <Image src={screen} alt="" class="cut" widths={[260, 520]} sizes="16vw" loading="lazy" />
+      <figcaption class="script">week one</figcaption>
+    </figure>
+
+    <ol class="method__steps">
+      {
+        steps.map((s, i) => (
+          <li class={`method__step method__step--${i + 1}`}>
+            <span class="method__no" data-drift={i % 2 ? 7 : 11} aria-hidden="true">{s.no}</span>
+            <div class="method__txt">
+              <h3 class="d3">
+                <span class="visually-hidden">{s.no}. </span>{s.title}
+              </h3>
+              <p class="body-s">{s.text}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  /* phones first: one column, still at mixed numeral sizes */
+  .method__in {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: grid;
+    gap: 1.6rem;
+    padding-top: 1.8rem;
+  }
+
+  .method__h { margin: 0; display: grid; justify-items: start; }
+  .method__word {
+    display: block;
+    font-size: clamp(2.8rem, 15vw, 5rem);
+    line-height: 0.84;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+  }
+  .method__sign {
+    display: block;
+    margin-top: -0.12em;
+    margin-left: 1.6em;
+    padding-right: 0.25em;
+    white-space: nowrap;
+    font-size: clamp(1.5rem, 7vw, 2.4rem);
+  }
+
+  .method__steps { margin: 0; padding: 0; list-style: none; display: grid; gap: 1.6rem; }
+  .method__step {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: clamp(0.7rem, 1.4vw, 1.3rem);
+  }
+  .method__no {
+    font-family: var(--serif);
+    font-weight: 900;
+    line-height: 0.78;
+    letter-spacing: -0.03em;
+    color: var(--pen);
+    font-size: clamp(3.4rem, 16vw, 5rem);
+  }
+  .method__step--2 .method__no, .method__step--4 .method__no { font-size: clamp(2.6rem, 11vw, 3.6rem); }
+  .method__txt { display: grid; gap: 0.3rem; padding-top: 0.15rem; }
+  .method__txt .d3 { margin: 0; color: var(--ink); }
+  .method__txt .body-s { margin: 0; color: var(--body); }
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .method__snap { width: 130px; margin: 0; rotate: -4deg; justify-self: end; }
+  .method__snap :global(img) { aspect-ratio: 4 / 3; }
+  .method__snap figcaption {
+    padding-top: 0.25rem;
+    font-size: 0.95rem;
+    text-align: center;
+  }
+  .method__line, .method__note, .method__leaf { display: none; }
+
+  /* ── tablet and up: the weave, margin to margin ── */
+  @media (min-width: 861px) {
+    .method__in {
+      display: block;
+      min-height: clamp(420px, 40vw, 560px);
+      padding-top: 0;
+    }
+
+    .method__h {
+      position: absolute;
+      z-index: 4;
+      left: 1%;
+      top: 0;
+    }
+    .method__word { font-size: clamp(2.8rem, 8.8vw, 8.4rem); }
+    .method__sign { font-size: clamp(1.5rem, 4.2vw, 3.8rem); }
+
+    .method__note {
+      display: block;
+      position: absolute;
+      z-index: 2;
+      left: 61%;
+      bottom: 5%;
+      width: clamp(84px, 9%, 124px);
+      rotate: -2deg;
+    }
+
+    /* the pen line: stroke-dashoffset runs against --draw, so each arrow is
+       laid down as its board is read, the head last */
+    .method__line {
+      display: block;
+      position: absolute;
+      z-index: 3;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      pointer-events: none;
+    }
+    .method__line path {
+      fill: none;
+      stroke: var(--pen);
+      stroke-width: 2.3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 1 1;
+      stroke-dashoffset: calc(1 - var(--draw, 1));
+    }
+
+    .method__snap {
+      position: absolute;
+      z-index: 5;
+      left: 38.5%;
+      top: 3%;
+      width: clamp(120px, 13vw, 190px);
+      rotate: -3deg;
+      justify-self: auto;
+    }
+
+    .method__leaf {
+      display: block;
+      right: -4%;
+      bottom: -14%;
+      width: clamp(240px, 27%, 380px);
+      height: auto;
+      aspect-ratio: 4 / 5;
+      object-fit: cover;
+      rotate: -24deg;
+      mask-image: radial-gradient(ellipse at 50% 50%, #000 42%, transparent 74%);
+    }
+
+    .method__steps { display: block; }
+    .method__step {
+      position: absolute;
+      z-index: 4;
+      width: 42%;
+      gap: clamp(0.8rem, 1.6vw, 1.6rem);
+    }
+    .method__txt { gap: 0.4rem; padding-top: 0.3rem; }
+    .method__txt .d3 { font-size: clamp(1.3rem, 2.1vw, 2rem); }
+    .method__txt .body-s { font-size: clamp(0.95rem, 1.2vw, 1.15rem); line-height: 1.52; }
+
+    .method__step--1 { left: 58%; top: 0; }
+    .method__step--1 .method__no { font-size: clamp(4.4rem, 12vw, 11rem); }
+
+    .method__step--2 { left: 0; top: 26%; }
+    .method__step--2 .method__no { font-size: clamp(3.6rem, 9vw, 8rem); }
+
+    .method__step--3 { left: 58%; top: 51%; }
+    .method__step--3 .method__no { font-size: clamp(5rem, 13vw, 12rem); }
+
+    .method__step--4 { left: 0; top: 76%; }
+    .method__step--4 .method__no { font-size: clamp(4rem, 10vw, 9rem); }
+  }
+
+  @media (min-width: 861px) and (max-width: 1100px) {
+    .method__snap { display: none; }
+  }
+</style>

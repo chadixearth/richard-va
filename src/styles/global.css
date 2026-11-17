@@ -1,0 +1,595 @@
+/* ═══════════════════════════════════════════════════════════════
+   RICHARD LEGASPI — PORTFOLIO DECK
+   A slide deck that happens to be a web page.
+   Alternating matcha panels, chunky display type, collage furniture.
+
+   Motion lives in src/scripts/motion.ts. This file only prepares the
+   ground for it: the `.motion` class is added by that module, so every
+   rule below it is a no-op on a page where the script never runs.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ground */
+  --page: #E6E2D2;
+  --cream: #F6F3E8;
+  --cream-2: #EDE9DA;
+  --deep: #22411A;
+  --deep-2: #2D5522;
+
+  /* ink */
+  --ink: #0E1509;
+  --body: #2A3720;
+  --muted: #5C6B50;
+  --on-deep: #0E1509;
+  --on-deep-2: rgba(14, 21, 9, 0.72);
+  --on-deep-3: rgba(14, 21, 9, 0.46);
+
+  /* matcha accents — ONE pen writes every headline, label and scribble on
+     the deck, the way the reference uses a single blue. `--powder` stays a
+     fill only (highlighter, dots, tape). */
+  --pen: #3E7A1E;
+  --pen-2: #2E5C15;
+  --powder: #A6D92F;
+  --powder-2: #8CBD1F;
+  --matcha: #6E9440;
+  --wash: #DCE8C4;
+
+  --rule: rgba(14, 21, 9, 0.16);
+  --rule-deep: rgba(14, 21, 9, 0.16);
+
+  --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  /* Fraunces, not a didone: the soft wedge serifs and the WONK axis read as
+     something cut and printed, which is the whole vibe. Playfair's hairlines
+     read as a wedding invitation at this size. */
+  --serif: "Fraunces", "Times New Roman", Georgia, serif;
+  --script: "Caveat", "Segoe Script", cursive;
+  --mono: "DM Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  /* paper sheets, not app cards: a hairline radius reads as a cut edge */
+  --radius: 3px;
+  --pad: clamp(0.85rem, 2.6vw, 1.6rem);
+  --gut: clamp(1.4rem, 2.9vw, 2.6rem);
+  --deckgap: clamp(0.7rem, 1.6vw, 1.15rem);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  background: var(--page);
+  color: var(--body);
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(0.95rem, 0.9rem + 0.2vw, 1.04rem);
+  line-height: 1.6;
+  letter-spacing: -0.005em;
+  /* Fraunces axes, inherited by every display word. WONK swaps in the
+     wonky single-storey forms, SOFT rounds the wedge terminals: cut and
+     printed, not engraved. Other families ignore axes they do not have. */
+  font-variation-settings: "SOFT" 28, "WONK" 1, "opsz" 144;
+  /* `clip`, not `hidden`: `hidden` turns <body> into a scroll container and
+     kills `position: sticky` on the slides. */
+  overflow-x: clip;
+}
+
+img, svg, video { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+ul, ol { list-style: none; padding: 0; }
+button { font: inherit; color: inherit; }
+
+::selection { background: var(--powder); color: var(--ink); }
+
+:focus-visible { outline: 3px solid var(--pen); outline-offset: 3px; border-radius: 4px; }
+
+.sr {
+  position: absolute; width: 1px; height: 1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+/* the skip link is the one hidden control that must come back: a keyboard
+   user has to see where the first Tab went */
+.sr:focus {
+  width: auto; height: auto;
+  overflow: visible; clip-path: none;
+  inset: 0.6rem auto auto 0.6rem;
+  z-index: 100;
+  display: inline-flex; align-items: center;
+  min-height: 44px;
+  padding: 0 1rem;
+  font-family: var(--mono); font-size: 0.72rem;
+  color: var(--paper); background: var(--pen-2);
+}
+
+/* ── the deck ──────────────────────────────────────────────────
+   Block flow, not grid: a sticky grid item is trapped inside its own
+   grid area and can never stick. Block children get the whole deck as
+   their containing block, which is what the stack needs.             */
+.deck {
+  display: block;
+  max-width: 1340px;
+  margin-inline: auto;
+  padding: var(--deckgap) var(--pad);
+}
+
+/* Every board is the same sheet of cream paper. The deck is printed, not
+   themed: one ink (`--pen`), one paper, photocopied pictures, handwriting
+   in the margins. There are no ground modifiers.                      */
+.slide {
+  --dim: 0;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  /* an in-page link must not drop a board's heading under the running head */
+  scroll-margin-top: calc(var(--park, 72px) + 0.4rem);
+  border-radius: var(--radius);
+  padding: clamp(1.4rem, 3vw, 2.8rem) var(--gut);
+  min-height: clamp(460px, 52vw, 680px);
+  margin-bottom: var(--deckgap);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: var(--cream);
+  color: var(--body);
+}
+.slide:last-child { margin-bottom: 0; }
+
+/* the paper itself: a pressed, slightly uneven sheet */
+.slide::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 90% at 18% 6%, rgba(255, 255, 255, 0.72), transparent 56%),
+    radial-gradient(110% 80% at 86% 96%, rgba(14, 21, 9, 0.07), transparent 58%),
+    repeating-linear-gradient(
+      104deg,
+      rgba(14, 21, 9, 0.022) 0 2px,
+      transparent 2px 7px
+    ),
+    repeating-linear-gradient(
+      17deg,
+      rgba(14, 21, 9, 0.018) 0 1px,
+      transparent 1px 9px
+    );
+  mix-blend-mode: multiply;
+  opacity: 0.9;
+}
+
+/* the shadow the arriving board casts on the one it covers */
+.slide::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  pointer-events: none;
+  background: var(--ink);
+  opacity: var(--dim);
+}
+
+/* ── the stack itself — switched on by motion.ts above 900×620 ──
+
+   Every panel is exactly one board: the same height, parked at the same
+   top, so no board is ever half-visible or cut off by the nav. `--board`
+   and `--park` are measured in JS; `--hold` is the still beat a board gets
+   on screen before the next one starts climbing over it.
+
+   `--fit` is a safety net, not a budget: if a panel's content still runs
+   past the board on a short viewport it is zoomed down rather than
+   clipped. Panels are authored to need no more than a hair of it.        */
+.stacked .slide {
+  position: sticky;
+  top: var(--park, 96px);
+  height: var(--board, auto);
+  min-height: 0;
+  margin-bottom: var(--hold, var(--deckgap));
+  box-shadow: 0 -26px 50px -30px rgba(14, 21, 9, 0.62);
+}
+.stacked .slide:last-child { margin-bottom: 0; }
+.stacked .slide > * { zoom: var(--fit, 1); }
+
+/* slide index tab, top-left of every panel */
+.slide__no {
+  position: absolute;
+  top: clamp(1rem, 2.2vw, 1.7rem);
+  left: clamp(1rem, 2.2vw, 1.7rem);
+  z-index: 3;
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  color: currentColor;
+  opacity: 0.45;
+}
+
+/* ── type ───────────────────────────────────────────────────────
+
+   The display voice is a heavy serif in the one ink. Archivo stays for
+   body and for the condensed `.cond` sub-voice; Caveat is the pen.      */
+.d1 {
+  font-family: var(--serif);
+  font-weight: 900;
+  font-size: clamp(2.9rem, 7.6vw, 6.2rem);
+  line-height: 0.88;
+  letter-spacing: -0.012em;
+  text-transform: uppercase;
+  color: var(--pen);
+}
+.d2 {
+  font-family: var(--serif);
+  font-weight: 900;
+  font-size: clamp(2.2rem, 5.2vw, 4.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--pen);
+}
+.d3 {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(1.15rem, 1.9vw, 1.55rem);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+/* the condensed uppercase sub-voice, for anything that is not the headline */
+.cond {
+  font-family: var(--display);
+  font-stretch: 76%;
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: -0.005em;
+}
+/* the pen: every signature, margin note and arrow label */
+.script {
+  font-family: var(--script);
+  font-weight: 700;
+  font-stretch: normal;
+  letter-spacing: 0;
+  line-height: 0.95;
+  color: var(--pen);
+}
+/* mono micro-label. Sentence case with modest tracking: the wide-tracked
+   uppercase label is the most recognisable AI tell, and the reference deck
+   sets its running heads in plain sentence case. */
+.label {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+}
+.lede {
+  font-size: clamp(1.02rem, 0.95rem + 0.42vw, 1.3rem);
+  line-height: 1.52;
+  letter-spacing: -0.012em;
+}
+.body-s { font-size: 0.9rem; line-height: 1.58; }
+
+.on-deep-2 { color: var(--on-deep-2); }
+.muted { color: var(--muted); }
+
+/* highlighter swipe — the motif, used in the cover and the closer.
+   `--swipe` is driven by motion.ts so the stroke lands when you reach it. */
+/* a highlighter swipe, not a filled box: the ink sits over the lower two
+   thirds of the word, runs slightly past both ends and fades out at them */
+.mark { position: relative; display: inline-block; color: var(--ink); padding-inline: 0.1em; }
+.mark::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 38% -0.18em -0.08em -0.14em;
+  background: var(--powder);
+  opacity: 0.85;
+  transform: rotate(-1.1deg);
+  transform-origin: 0 50%;
+  mask-image: linear-gradient(90deg, transparent 0, #000 5%, #000 95%, transparent 100%);
+  clip-path: inset(0 calc(100% - var(--swipe, 100%)) 0 0);
+}
+
+/* ── split-text plumbing ───────────────────────────────────────
+   SplitText's mask clips at the padding box, so the line carries the
+   descender room and the mask cancels it again in the flow.          */
+.m-line { padding-bottom: 0.18em; }
+.m-line-mask { margin-bottom: -0.18em; }
+.m-char { padding-bottom: 0.14em; }
+.m-char-mask { margin-bottom: -0.14em; }
+
+/* ── collage furniture ─────────────────────────────────────── */
+
+/* buttons */
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.95rem 1.7rem;
+  border-radius: 2px;
+  border: 2px solid var(--ink);
+  background: var(--ink);
+  color: var(--cream);
+  font-weight: 700;
+  font-size: 0.92rem;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  transition: color 0.35s var(--ease);
+}
+.btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--powder);
+  transform: translateY(101%);
+  transition: transform 0.4s var(--ease);
+}
+.btn > * { position: relative; z-index: 1; transition: transform 0.4s var(--ease); }
+.btn:hover { color: var(--ink); }
+.btn:hover::before { transform: translateY(0); }
+.btn:hover > *:last-child { transform: translateX(4px); }
+
+.btn--ghost { background: transparent; color: var(--ink); }
+.btn--light { background: var(--cream); border-color: var(--cream); color: var(--ink); }
+.btn--light:hover { color: var(--ink); }
+
+/* tape strip for collaged items */
+.tape {
+  position: absolute;
+  width: 74px; height: 22px;
+  background: rgba(166, 217, 47, 0.55);
+  box-shadow: 0 1px 3px rgba(14, 21, 9, 0.16);
+}
+/* ── nav ───────────────────────────────────────────────────────
+   A running head on a sheet of paper, not a floating app bar: no pill, no
+   blur card, just a hairline rule and the deck's own typography.
+   It is opaque, and it carries a strip below itself, because a parked board
+   that has run out of sticky room would otherwise show through the band
+   between the rule and the top of the sheet.                          */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--page);
+}
+.nav::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; top: 100%;
+  height: 22px;
+  background: var(--page);
+}
+.nav__in {
+  max-width: 1340px;
+  margin-inline: auto;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.95rem var(--pad) 0.7rem;
+  border-bottom: 1px solid var(--rule);
+}
+.nav__brand {
+  font-family: var(--serif);
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  font-size: 1.12rem;
+  /* the running head and the HUD sit on the darker desk ground, not on the
+     sheet, so they use the deeper ink to clear 4.5:1 */
+  color: var(--pen-2);
+}
+.nav__links { display: flex; gap: 1.5rem; }
+.nav__links a {
+  position: relative;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.04em;
+  color: var(--body);
+  transition: color 0.25s var(--ease);
+}
+.nav__links a::after {
+  content: "";
+  position: absolute;
+  left: -0.25em; right: -0.25em; bottom: -0.3em;
+  height: 5px;
+  background: var(--powder);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 0.4s var(--ease);
+}
+.nav__links a:hover, .nav__links a:focus-visible { color: var(--pen); }
+.nav__links a:hover::after, .nav__links a.is-on::after { transform: scaleX(1); }
+.nav__links a.is-on { color: var(--pen); }
+.nav__cta {
+  align-self: center;
+  padding: 0.42rem 0.95rem;
+  font-size: 0.68rem;
+  font-family: var(--mono);
+  letter-spacing: 0.04em;
+  color: var(--pen-2);
+  background: none;
+  border: 1px solid var(--pen-2);
+  border-radius: 0;
+}
+.nav__cta:hover, .nav__cta:focus-visible { color: var(--paper); background: var(--pen-2); }
+@media (max-width: 860px) { .nav__links { display: none; } }
+/* ── deck HUD: which board you are on ──────────────────────────
+   Every board is paper now, so the HUD is simply drawn in pen rather than
+   blended against an alternating ground.                              */
+.hud {
+  position: fixed;
+  right: clamp(0.5rem, 1.3vw, 1.05rem);
+  top: 50%;
+  translate: 0 -50%;
+  z-index: 30;
+  display: grid;
+  justify-items: center;
+  gap: 0.55rem;
+  pointer-events: none;
+  color: var(--pen-2);
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  opacity: 0;
+  transition: opacity 0.6s var(--ease);
+}
+.hud.is-on { opacity: 1; }
+.hud__n { font-size: 0.82rem; letter-spacing: 0.04em; }
+.hud__rail { position: relative; width: 1px; height: clamp(90px, 14vh, 150px); background: var(--rule); }
+.hud__fill {
+  position: absolute;
+  inset: 0;
+  background: var(--pen-2);
+  transform: scaleY(0);
+  transform-origin: 50% 0;
+}
+.hud__total { font-size: 0.56rem; }
+.hud__name {
+  writing-mode: vertical-rl;
+  letter-spacing: 0.12em;
+  font-size: 0.58rem;
+  margin-top: 0.2rem;
+}
+@media (max-width: 1120px) { .hud { display: none; } }
+
+/* ── motion gate ───────────────────────────────────────────────
+   No script, failed script, or reduced motion: everything is visible.
+   motion.ts adds `.motion`, prepares each group, then adds `.ready`.  */
+.rv { opacity: 1; }
+.motion .rv { opacity: 0; }
+.motion .rv.ready { opacity: 1; }
+
+/* A `[data-draw]` piece is ruled in by the scroll scrub. It is drawn whole by
+   default so a static page keeps its rules, and only emptied once the motion
+   layer is live and can draw it. */
+[data-draw] { --draw: 1; }
+.motion [data-draw] { --draw: 0; }
+
+/* ── small screens ─────────────────────────────────────────── */
+@media (max-width: 760px) {
+  .slide { min-height: 0; padding-block: clamp(2.4rem, 11vw, 3.2rem); border-radius: 18px; }
+}
+/* ── short screens ─────────────────────────────────────────────
+
+   A 768- or 720-tall laptop has the same content on a much smaller board,
+   so the only honest height to buy back is chrome: the nav pill and the
+   panel padding. Without this the `--fit` net has to scale panels past the
+   point where the type reads. Below 700 tall the stack switches off
+   entirely (motion.ts) and the deck scrolls normally.                   */
+@media (min-width: 900px) and (max-height: 850px) {
+  .nav { padding-top: calc(var(--pad) * 0.6); }
+  .nav__in { padding-block: 0.34rem; }
+  .nav__cta { padding: 0.46rem 1rem; }
+  .slide { padding-block: clamp(1.1rem, 2.1vw, 1.9rem); }
+}
+
+/* ── touch: every link is a 44px target on a phone ─────────────
+   The type stays small (it is a contact sheet, not a button bar); the hit
+   area grows around it instead.                                        */
+@media (hover: none), (max-width: 700px) {
+  .nav__brand, .nav__cta, .ct__a, .ft__a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* ── printed furniture ─────────────────────────────────────────
+
+   Every board carries the same three things: a rail of micro-labels across
+   the top, photocopied pictures that run off the edges, and handwriting in
+   a margin. This is the deck's signature — use these, do not re-invent. */
+
+.rail {
+  position: absolute;
+  top: clamp(0.95rem, 2.1vw, 1.6rem);
+  left: var(--gut);
+  right: var(--gut);
+  z-index: 6;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--pen);
+  pointer-events: none;
+}
+.rail > :last-child { text-align: right; }
+/* on a phone there is no room for a three-column running head, so only the
+   board index survives */
+@media (max-width: 700px) {
+  .rail { grid-template-columns: 1fr; }
+  .rail > :not(:first-child) { display: none; }
+}
+
+/* the index moves out of the rail's way */
+.slide__no {
+  top: auto;
+  bottom: clamp(0.9rem, 2vw, 1.5rem);
+  left: var(--gut);
+  color: var(--pen);
+  opacity: 0.4;
+}
+
+/* Photocopied picture: printed into the paper with `multiply`, so the sheet
+   shows through. Three treatments, because the source photos are dark and
+   moody and each one needs a different exposure to read on cream:
+     .cut        a snapshot, lifted until it is a high-key photocopy
+     .cut--hard  the figure, pushed until it reads as solid ink
+     .cut--bot   botanical matter, inverted so leaves go dark on white and
+                 the background dissolves into the paper                   */
+.cut {
+  position: relative;
+  display: block;
+  filter: grayscale(1) contrast(1.48) brightness(1.52);
+  mix-blend-mode: multiply;
+}
+.cut--hard { filter: grayscale(1) contrast(1.9) brightness(1.4); }
+.cut--bot { filter: grayscale(1) invert(1) contrast(1.25) brightness(1.05); }
+
+/* the dot screen that sells the photocopy */
+.screened { position: relative; }
+.screened::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background-image: radial-gradient(circle at 50% 50%, rgba(246, 243, 232, 0.9) 0.7px, transparent 0.8px);
+  background-size: 3px 3px;
+  mix-blend-mode: screen;
+  opacity: 0.5;
+}
+
+/* torn snapshot: white border, a little crooked, never square to the page */
+.snap {
+  position: relative;
+  background: #fbf9f2;
+  padding: 7px 7px 7px;
+  box-shadow: 0 10px 22px -16px rgba(14, 21, 9, 0.6);
+}
+.snap img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+/* A block of pen handwriting used as texture in a margin. The stroke must
+   not scale with the block, or a wide note turns into fat green waves. */
+.scrib { color: var(--pen); opacity: 0.8; pointer-events: none; }
+.scrib svg { display: block; width: 100%; height: auto; overflow: visible; }
+.scrib path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.1;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Anything meant to run off the sheet. `height: auto` matters: Astro's
+   <Image> emits a real `height` attribute, and without this a clipping
+   given a width is stretched into a tall strip. */
+.bleed { position: absolute; z-index: 1; pointer-events: none; height: auto; }

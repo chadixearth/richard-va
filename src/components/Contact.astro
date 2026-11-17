@@ -1,0 +1,167 @@
+---
+import { Image } from "astro:assets";
+import { profile } from "../data/content";
+import Rail from "./Rail.astro";
+import Scribble from "./Scribble.astro";
+import headshot from "../assets/richard-headshot.jpg";
+import leaf from "../assets/photos/svc-3.jpg";
+
+const mailto = `mailto:${profile.email}?subject=${encodeURIComponent("VA enquiry for " + profile.name)}`;
+
+const rows = [
+  { k: "Email", v: profile.email, href: mailto },
+  { k: "Phone / WhatsApp", v: profile.phone, href: `tel:${profile.phoneHref}` },
+  { k: "Design portfolio", v: profile.designPortfolio, href: profile.designPortfolioUrl },
+  { k: "GitHub", v: profile.github, href: profile.githubUrl },
+];
+---
+
+<section class="slide ct" id="contact" aria-labelledby="ct-title">
+  <Rail no="10" name="Contact" />
+
+  <div class="ct__in rv">
+    <Image class="cut cut--bot bleed ct__bot" src={leaf} alt="" widths={[340, 680]} sizes="27vw" loading="lazy" data-drift="5" />
+    <div class="ct__say">
+      <h2 id="ct-title" class="d1 ct__h">
+        Let's work<br />together and<br />build the <span class="mark">system</span>
+      </h2>
+      <p class="lede ct__lead">
+        Tell me what your week looks like and I'll come back with what I'd take over first, what
+        I'd automate, and what it costs. No deck, no discovery fee.
+      </p>
+
+      <div class="ct__cta">
+        <a class="btn" href={mailto}><span>Email me</span></a>
+        <a class="btn btn--ghost" href={`tel:${profile.phoneHref}`}><span>{profile.phone}</span></a>
+      </div>
+
+      <div class="ct__note" data-drift="11"><Scribble lines={3} seed={11} /></div>
+    </div>
+
+    <div class="ct__card">
+      <figure class="snap ct__pol" data-drift="15">
+        <Image src={headshot} alt={profile.name} widths={[260, 520]} sizes="200px" loading="lazy" />
+        <figcaption class="script">Available now</figcaption>
+      </figure>
+
+      <dl class="ct__dl">
+        {
+          rows.map((r) => (
+            <div class="ct__row" data-draw>
+              <dt class="label">{r.k}</dt>
+              <dd class="ct__v">
+                <a class="ct__a" href={r.href}>{r.v}</a>
+              </dd>
+            </div>
+          ))
+        }
+        <div class="ct__row" data-draw>
+          <dt class="label">Hours</dt>
+          <dd class="ct__v ct__v--plain">{profile.timezone}</dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<style>
+  .ct__in {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.85fr);
+    gap: clamp(1.6rem, 4vw, 4rem);
+    align-items: stretch;
+    margin-top: clamp(0.4rem, 1vw, 0.9rem);
+  }
+
+  /* the left column is a column: plea at the top, buttons at the bottom,
+     so the board is used from the rail down to the lower margin */
+  .ct__say { display: flex; flex-direction: column; }
+  .ct__card { display: flex; flex-direction: column; justify-content: center; }
+  .ct__h {
+    font-family: var(--serif);
+    font-weight: 900;
+    font-size: clamp(2.4rem, min(7vw, 11.2vh), 5.8rem);
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    color: var(--pen);
+  }
+  .ct__lead {
+    max-width: 38ch;
+    margin-top: clamp(1.1rem, 2.2vw, 1.6rem);
+    color: var(--body);
+    font-size: clamp(1rem, min(1.32vw, 2.11vh), 1.32rem);
+    line-height: 1.5;
+  }
+  .ct__cta { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: auto; padding-top: clamp(1.2rem, 2.4vw, 1.8rem); }
+  .ct__note { width: clamp(120px, 15%, 190px); margin-top: clamp(1rem, 2vw, 1.6rem); }
+
+  /* the right column is a contact sheet, not a card: the photo is pasted on
+     top of a plain ruled list, the way a print-out would be */
+  .ct__card { position: relative; padding-top: clamp(0.4rem, 2vw, 1.6rem); }
+  .ct__pol {
+    position: relative;
+    z-index: 2;
+    width: clamp(132px, 14vw, 180px);
+    margin: 0 0 -1.6rem auto;
+    rotate: 3deg;
+  }
+  .ct__pol :global(img) { aspect-ratio: 4 / 5; }
+  .ct__pol figcaption { padding-top: 0.3rem; font-size: 0.92rem; text-align: center; }
+
+  .ct__dl { position: relative; z-index: 1; border-top: 1px solid var(--rule); }
+  /* each line of the contact sheet rules itself in as you read down, and the
+     one you are pointing at steps forward so you know what you will dial */
+  .ct__row {
+    position: relative;
+    padding: 0.7rem 0;
+    transition: transform 0.35s var(--ease), opacity 0.35s var(--ease);
+  }
+  .ct__row::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 1px;
+    background: var(--rule);
+    transform: scaleX(var(--draw));
+    transform-origin: 0 50%;
+  }
+  .ct__dl:hover .ct__row, .ct__dl:focus-within .ct__row { opacity: 0.5; }
+  .ct__dl .ct__row:hover, .ct__dl .ct__row:focus-within {
+    opacity: 1;
+    transform: translateX(6px);
+  }
+  .ct__v { margin: 0.15rem 0 0; font-size: 0.95rem; font-weight: 600; color: var(--ink); overflow-wrap: anywhere; }
+  .ct__v--plain { font-weight: 500; color: var(--body); }
+  .ct__a { position: relative; }
+  .ct__a::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: -2px;
+    height: 7px;
+    background: var(--powder);
+    z-index: -1;
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: transform 0.35s var(--ease);
+  }
+  .ct__a:hover::after, .ct__a:focus-visible::after { transform: scaleX(1); }
+
+  .ct__bot {
+    left: -9%;
+    bottom: -34%;
+    width: clamp(150px, 18%, 240px);
+    rotate: 12deg;
+    opacity: 0.75;
+    mask-image: radial-gradient(ellipse at 50% 50%, #000 40%, transparent 72%);
+  }
+
+  @media (max-width: 900px) {
+    .ct__in { grid-template-columns: minmax(0, 1fr); }
+    /* one column: the snapshot sits above the list instead of on top of it */
+    .ct__pol { margin: 0 auto 0.9rem 0; }
+    .ct__bot, .ct__note { display: none; }
+  }
+</style>

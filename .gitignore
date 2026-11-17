@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.astro/
+.DS_Store
+.vercel/
+_cutout_preview.jpg
+
+.vercel
+.env*

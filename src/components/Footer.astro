@@ -1,0 +1,179 @@
+---
+import { Image } from "astro:assets";
+import { profile } from "../data/content";
+import Rail from "./Rail.astro";
+import Scribble from "./Scribble.astro";
+import leaf from "../assets/photos/svc-3.jpg";
+import strata from "../assets/photos/svc-2.jpg";
+import cup from "../assets/photos/work-3.jpg";
+
+const year = new Date().getFullYear();
+const links = [
+  { t: "Email", href: `mailto:${profile.email}` },
+  { t: "WhatsApp", href: `tel:${profile.phoneHref}` },
+  { t: "Design portfolio", href: profile.designPortfolioUrl },
+  { t: "GitHub", href: profile.githubUrl },
+];
+
+/* Composition note (R-31): the last board is the back cover of the deck, so
+   it is the sheet at its emptiest and its largest: the name set as big as the
+   paper allows, signed by hand, with the ways to reach him ruled along the
+   bottom edge. The three rows are pinned to top, middle and bottom so the
+   board is used end to end rather than floating a block in the centre. */
+---
+
+<footer class="slide ft">
+  <Rail no="11" name="End" />
+
+  <div class="ft__in rv">
+    <Image class="cut cut--bot bleed ft__bot" src={leaf} alt="" widths={[360, 720]} sizes="30vw" loading="lazy" data-drift="6" />
+    <Image class="cut cut--bot bleed ft__bot2" src={strata} alt="" widths={[300, 600]} sizes="24vw" loading="lazy" data-drift="4" />
+
+    <div class="ft__top">
+      <div class="ft__note" data-drift="10"><Scribble lines={4} seed={27} /></div>
+      <figure class="snap ft__snap" data-drift="14">
+        <Image src={cup} alt="" class="cut" widths={[260, 520]} sizes="16vw" />
+        <figcaption class="script">End of deck</figcaption>
+      </figure>
+    </div>
+
+    <div class="ft__plate">
+      <p class="d1 ft__mark">{profile.name}</p>
+      <p class="script ft__sign">Thank you</p>
+    </div>
+
+    <div class="ft__bottom">
+      <div class="ft__row" data-draw>
+        <p class="lede ft__tag">{profile.tagline}</p>
+        <ul class="ft__links">
+          {links.map((l) => <li><a class="ft__a" href={l.href}>{l.t}</a></li>)}
+        </ul>
+      </div>
+
+      <div class="ft__base">
+        <p class="label">&copy; {year} {profile.name}</p>
+        <p class="label ft__built"><i aria-hidden="true"></i>Built with Astro · {profile.location}</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .ft { min-height: 0; padding-block: clamp(1.4rem, 3vw, 2.6rem); }
+  .ft__in {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: clamp(0.8rem, 2vw, 1.6rem);
+  }
+
+  /* top row: the loose pieces, pinned against the rail */
+  .ft__top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.5rem;
+    /* clear of the rail: nothing pasted may cross the running head */
+    padding-top: clamp(1.5rem, 3.2vw, 2.4rem);
+  }
+  .ft__note { width: clamp(110px, 13%, 168px); }
+  .ft__snap { width: clamp(118px, 13.5%, 186px); margin: 0; rotate: 4deg; }
+  .ft__snap :global(img) { aspect-ratio: 5 / 4; }
+  .ft__snap figcaption { padding-top: 0.3rem; font-size: 0.9rem; text-align: center; }
+
+  /* middle row: the name, as big as the sheet allows */
+  /* the plate is only as wide as the longest line, so the handwriting lands
+     against the end of the name rather than the far edge of the sheet */
+  .ft__plate { align-self: center; display: grid; }
+  .ft__mark {
+    font-family: var(--serif);
+    font-weight: 900;
+    /* one line across the whole sheet: the name is the board */
+    font-size: clamp(2.2rem, 7.9vw, 8.4rem);
+    white-space: nowrap;
+    line-height: 0.82;
+    letter-spacing: -0.024em;
+    text-transform: uppercase;
+    color: var(--pen);
+  }
+  /* the sign-off is handwritten, tucked under the tail of the name */
+  .ft__sign {
+    justify-self: end;
+    margin-top: -0.52em;
+    margin-right: 0.2em;
+    font-size: clamp(1.4rem, 3.9vw, 3.2rem);
+    color: var(--pen);
+  }
+
+  /* bottom row: the ruled contact line, held to the lower margin */
+  .ft__bottom { align-self: end; display: grid; gap: clamp(0.7rem, 1.6vw, 1.2rem); }
+  .ft__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem 2rem;
+    padding-top: clamp(0.8rem, 1.8vw, 1.2rem);
+    position: relative;
+  }
+  /* the rule above the contact line draws itself as the board is read */
+  .ft__row::before {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; top: 0;
+    height: 1px;
+    background: var(--rule);
+    transform: scaleX(var(--draw));
+    transform-origin: 0 50%;
+  }
+  .ft__tag { color: var(--body); max-width: 40ch; font-size: clamp(1rem, 1.25vw, 1.22rem); }
+  .ft__links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.6rem; }
+  .ft__a {
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 2px;
+    transition: color 0.25s var(--ease), border-color 0.25s var(--ease);
+  }
+  .ft__a:hover, .ft__a:focus-visible { color: var(--pen); border-color: var(--pen); }
+
+  .ft__base {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 2rem;
+    color: var(--muted);
+  }
+  .ft__built { display: inline-flex; align-items: center; gap: 0.5rem; }
+  .ft__built i { width: 7px; height: 7px; border-radius: 50%; background: var(--pen); }
+
+  .ft__bot, .ft__bot2 {
+    mask-image: radial-gradient(ellipse at 50% 50%, #000 42%, transparent 74%);
+  }
+  .ft__bot {
+    right: -8%;
+    top: 8%;
+    width: clamp(230px, 29%, 400px);
+    rotate: 168deg;
+    opacity: 0.9;
+  }
+  .ft__bot2 {
+    left: -13%;
+    bottom: -38%;
+    width: clamp(200px, 24%, 330px);
+    rotate: 12deg;
+    opacity: 0.6;
+  }
+
+  @media (max-width: 900px) {
+    .ft__in { grid-template-rows: none; }
+    .ft__bot, .ft__bot2, .ft__note { display: none; }
+    .ft__top { justify-content: flex-start; }
+    .ft__mark { white-space: normal; font-size: min(8.4rem, 11.4vw); }
+    .ft__sign { justify-self: start; margin-right: 0; margin-top: 0.1em; }
+  }
+</style>

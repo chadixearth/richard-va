@@ -1,0 +1,49 @@
+---
+/* A block of pen handwriting, used as texture in a margin.
+
+   Purpose (R-22, R-31): the reference deck pins a handwritten note in the
+   corner of every sheet. It is not a generic illustration, it is the same
+   ink as the headlines, and it signals "working notebook" rather than
+   "web page". Unreadable by design, so it carries no fabricated claim
+   (R-38) and is hidden from assistive tech.
+
+   The paths are generated from a fixed seed, so the scrawl is stable
+   between builds but no two blocks look alike. */
+interface Props {
+  lines?: number;
+  seed?: number;
+  class?: string;
+}
+const { lines = 6, seed = 7, class: cls = "" } = Astro.props;
+
+const W = 120;
+const LH = 11;
+
+/* deterministic pseudo-random, so the build is reproducible */
+let s = seed * 9301 + 49297;
+const rnd = () => ((s = (s * 9301 + 49297) % 233280) / 233280);
+
+const paths: string[] = [];
+for (let i = 0; i < lines; i++) {
+  const y = 6 + i * LH;
+  /* last line of a paragraph is short, like real handwriting */
+  const end = i === lines - 1 ? W * (0.3 + rnd() * 0.3) : W * (0.86 + rnd() * 0.14);
+  let d = `M2 ${y.toFixed(1)}`;
+  let x = 2;
+  while (x < end) {
+    const step = 4 + rnd() * 5;
+    const up = y - (2.2 + rnd() * 2.6);
+    const down = y + (0.6 + rnd() * 1.8);
+    d += ` C${(x + step * 0.3).toFixed(1)} ${up.toFixed(1)} ${(x + step * 0.7).toFixed(1)} ${down.toFixed(1)} ${(x + step).toFixed(1)} ${y.toFixed(1)}`;
+    x += step;
+  }
+  paths.push(d);
+}
+const H = 6 + lines * LH;
+---
+
+<div class={`scrib ${cls}`} aria-hidden="true">
+  <svg viewBox={`0 0 ${W} ${H}`} role="presentation" focusable="false">
+    {paths.map((d) => <path d={d} />)}
+  </svg>
+</div>
