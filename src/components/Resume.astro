@@ -4,6 +4,7 @@ import { experience, education } from "../data/content";
 import Rail from "./Rail.astro";
 import eduPhoto from "../assets/photos/svc-1.jpg";
 import leaf from "../assets/photos/svc-3.jpg";
+import resumePage from "../assets/resume/resume-page.png";
 
 /* Composition note (R-31): one spread, edge to edge. The title is set across
    the top of the sheet with the education pinned to its right (the degree is
@@ -43,12 +44,17 @@ import leaf from "../assets/photos/svc-3.jpg";
     </div>
 
     <div class="resume__corner">
-      <aside class="resume__edu" aria-label="Education">
-        <p class="label resume__edulbl">Education</p>
-        <p class="resume__degree">{education.degree}</p>
-        <p class="resume__school">{education.school}</p>
-        <p class="resume__school">{education.when}</p>
-      </aside>
+      <div class="resume__col">
+        <aside class="resume__edu" aria-label="Education">
+          <p class="label resume__edulbl">Education</p>
+          <p class="resume__degree">{education.degree}</p>
+          <p class="resume__school">{education.school}</p>
+          <p class="resume__school">{education.when}</p>
+        </aside>
+        <button type="button" class="btn resume__cvbtn" data-cv-open aria-haspopup="dialog" aria-controls="cv">
+          <span>View full resume</span><span aria-hidden="true">↗</span>
+        </button>
+      </div>
 
       <figure class="snap resume__snap" data-drift="14">
         <Image src={eduPhoto} alt="" class="cut" widths={[220, 440]} sizes="14vw" loading="lazy" />
@@ -57,6 +63,71 @@ import leaf from "../assets/photos/svc-3.jpg";
     </div>
   </div>
 </section>
+
+<dialog class="cv" id="cv" data-lenis-prevent aria-labelledby="cv-title">
+  <div class="cv__paper">
+    <span class="tape cv__tape cv__tape--l" aria-hidden="true"></span>
+    <span class="tape cv__tape cv__tape--r" aria-hidden="true"></span>
+    <header class="cv__head">
+      <div class="cv__title">
+        <p class="label cv__kicker">Resume · 1 page</p>
+        <h3 id="cv-title" class="cv__name">Richard S. Legaspi, AI Engineer</h3>
+      </div>
+      <div class="cv__actions">
+        <a class="btn cv__act" href="/Richard_Legaspi-Resume.pdf" download><span>Download PDF</span></a>
+        <a class="btn btn--ghost cv__act" href="/Richard_Legaspi-Resume.pdf" target="_blank" rel="noopener"><span>Open PDF</span></a>
+      </div>
+      <button type="button" class="cv__x" data-cv-close aria-label="Close resume">
+        <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 3 15 15M15 3 3 15"></path></svg>
+      </button>
+    </header>
+    <div class="cv__scroll" tabindex="-1">
+      <div class="cv__page">
+        <Image
+          src={resumePage}
+          alt="Resume of Richard S. Legaspi, AI Engineer — full text in the PDF"
+          widths={[700, 1100, 1500]}
+          sizes="(min-width: 900px) 760px, 94vw"
+          loading="lazy"
+        />
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<script>
+  const dlg = document.querySelector<HTMLDialogElement>("dialog.cv");
+  const trigger = document.querySelector<HTMLButtonElement>("[data-cv-open]");
+  if (dlg && trigger) {
+    const lock = (on: boolean) => document.dispatchEvent(new CustomEvent("deck:lock", { detail: on }));
+    let downOnBackdrop = false;
+
+    trigger.addEventListener("click", () => {
+      if (dlg.open) return;
+      dlg.showModal();
+      lock(true);
+      dlg.querySelector<HTMLElement>(".cv__scroll")?.scrollTo(0, 0);
+    });
+    dlg.querySelector("[data-cv-close]")?.addEventListener("click", () => dlg.close());
+
+    // a press that starts and ends on the dimmed desk closes the sheet
+    dlg.addEventListener("pointerdown", (e) => { downOnBackdrop = e.target === dlg; });
+    dlg.addEventListener("click", (e) => {
+      if (downOnBackdrop && e.target === dlg) dlg.close();
+      downOnBackdrop = false;
+    });
+    // the desk behind the sheet must not scroll the page underneath
+    const hold = (e: Event) => { if (e.target === dlg) e.preventDefault(); };
+    dlg.addEventListener("wheel", hold, { passive: false });
+    dlg.addEventListener("touchmove", hold, { passive: false });
+
+    // fires for Esc, the button and the backdrop alike
+    dlg.addEventListener("close", () => {
+      lock(false);
+      trigger.focus({ preventScroll: true });
+    });
+  }
+</script>
 
 <style>
   /* phones first: everything stacks in reading order */
@@ -243,6 +314,8 @@ import leaf from "../assets/photos/svc-3.jpg";
 
   /* the role sits left and the detail right once the sheet is wide enough */
   @media (min-width: 1100px) {
+    /* the school name fits on one line, which pays for the button below it */
+    .resume__edu { width: clamp(17rem, 27vw, 23rem); }
     .resume__body {
       grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
       grid-template-rows: auto 1fr;
@@ -257,10 +330,8 @@ import leaf from "../assets/photos/svc-3.jpg";
   }
 
   /* ── signature: point at a row and it comes forward ── */
-  @media (prefers-reduced-motion: no-preference) {
-    .resume__row {
-      transition: opacity 0.35s ease, translate 0.35s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.35s ease;
-    }
+  :global(html:not(.still)) .resume__row {
+    transition: opacity 0.35s ease, translate 0.35s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.35s ease;
   }
   .resume__list:hover .resume__row:not(:hover) {
     opacity: 0.72;
@@ -270,4 +341,138 @@ import leaf from "../assets/photos/svc-3.jpg";
     background-color: #fffefa;
   }
   .resume__row:hover .resume__role { color: var(--pen-2); }
+  /* ── the trigger: a small printed button under the degree ── */
+  .resume__col { display: grid; gap: 0.7rem; justify-items: start; }
+  .resume__cvbtn {
+    padding: 0.6rem 1.05rem;
+    font-family: inherit;
+    font-size: 0.86rem;
+    cursor: pointer;
+  }
+  .resume__cvbtn:focus-visible { outline: 2px solid var(--pen); outline-offset: 3px; }
+  @media (min-width: 861px) {
+    .resume__cvbtn { padding: 0.5rem 0.95rem; font-size: clamp(0.78rem, min(0.9vw, 1.45vh), 0.86rem); }
+  }
+
+  /* ── the resume dialog: the printed sheet laid on the desk ── */
+  .cv {
+    margin: auto;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--ink);
+    width: min(860px, calc(100vw - 1.25rem));
+    max-width: none;
+    max-height: calc(100dvh - 3rem);
+    overflow: visible;
+    rotate: -0.7deg;
+  }
+  .cv[open] { display: flex; flex-direction: column; }
+  .cv::backdrop { background: rgb(68 72 56 / 0.84); }
+  .cv__paper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    background: var(--cream);
+    border: 1px solid rgba(14, 21, 9, 0.16);
+    box-shadow: 0 34px 60px -28px rgba(14, 21, 9, 0.75), 0 2px 0 rgba(14, 21, 9, 0.06);
+  }
+  .cv__tape { display: block; top: -11px; }
+  .cv__tape--l { left: 7%; rotate: -5deg; }
+  .cv__tape--r { right: 41%; rotate: 4deg; }
+
+  .cv__head {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem 0.8rem;
+    padding: 1.1rem 0.8rem 0.8rem 1rem;
+    border-bottom: 1.5px solid var(--pen);
+    background: var(--cream);
+  }
+  .cv__title { flex: 1 1 12rem; min-width: 0; margin: 0; display: grid; gap: 0.1rem; }
+  .cv__kicker { margin: 0; color: var(--body); }
+  .cv__name {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(1.15rem, 4.4vw, 1.5rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  .cv__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-left: auto; }
+  .cv__act { padding: 0.55rem 0.95rem; font-size: 0.84rem; min-height: 44px; }
+  .cv__act:focus-visible { outline: 2px solid var(--pen); outline-offset: 3px; }
+  .cv__x {
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 2px solid var(--ink);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+  .cv__x:hover { background: var(--ink); color: var(--cream); }
+  .cv__x:focus-visible { outline: 2px solid var(--pen); outline-offset: 3px; }
+  .cv__x svg { width: 18px; height: 18px; }
+  .cv__x path { fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
+
+  .cv__scroll {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    padding: clamp(0.5rem, 2vw, 1.4rem);
+    background: #fbf9f2;
+  }
+  .cv__page { margin: 0 auto; max-width: 760px; box-shadow: 0 10px 24px -16px rgba(14, 21, 9, 0.6); outline: 1px solid rgba(14, 21, 9, 0.12); }
+  .cv__page :global(img) { display: block; width: 100%; height: auto; }
+
+  /* paper drops onto the desk; the desk dims behind it */
+  :global(html:not(.still)) .cv {
+    opacity: 0;
+    translate: 0 -2.2rem;
+    rotate: 3.2deg;
+    transition:
+      opacity 0.3s ease,
+      translate 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+      rotate 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+      overlay 0.55s allow-discrete,
+      display 0.55s allow-discrete;
+  }
+  :global(html:not(.still)) .cv[open] {
+    opacity: 1;
+    translate: 0 0;
+    rotate: -0.7deg;
+  }
+  @starting-style {
+    :global(html:not(.still)) .cv[open] {
+      opacity: 0;
+      translate: 0 -2.2rem;
+      rotate: 3.2deg;
+    }
+  }
+  :global(html:not(.still)) .cv::backdrop {
+    opacity: 0;
+    transition: opacity 0.4s ease, overlay 0.4s allow-discrete, display 0.4s allow-discrete;
+  }
+  :global(html:not(.still)) .cv[open]::backdrop { opacity: 1; }
+  @starting-style {
+    :global(html:not(.still)) .cv[open]::backdrop { opacity: 0; }
+  }
+
+  @media (max-width: 520px) {
+    .cv__actions { width: 100%; margin-left: 0; }
+    .cv__act { flex: 1 1 0; justify-content: center; }
+    .cv__x { position: absolute; top: 0.55rem; right: 0.55rem; }
+    .cv__title { padding-right: 3.2rem; }
+  }
 </style>

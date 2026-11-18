@@ -250,7 +250,5 @@ import desk from "../assets/photos/work-2.jpg";
     .cover__cue { display: none; }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .cover__cue i { animation: none; transform: none; opacity: 1; }
-  }
+  :global(html.still) .cover__cue i { animation: none; transform: none; opacity: 1; }
 </style>

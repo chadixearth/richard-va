@@ -13,13 +13,16 @@
    5. ALIVE   — the tool rows are marquees whose speed and direction
                 answer your scroll.
 
-   `prefers-reduced-motion` drops the whole file and shows a static page.
+   Full motion is the default for everyone, whatever the OS reports; the
+   switch in the running head turns it off (`html.still`), and then the
+   whole file stands down and shows a static page.
    ═══════════════════════════════════════════════════════════════ */
 
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import Lenis from "lenis";
+import { backdrop } from "./backdrop";
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -33,9 +36,30 @@ const all = (sel: string, scope: ParentNode = doc): El[] =>
 const one = (sel: string, scope: ParentNode = doc): El | null =>
   scope.querySelector(sel) as El | null;
 
-/* The stylesheet only hides the reveal groups while this class is on, so a
-   failed or skipped boot leaves a perfectly readable static page. */
-root.classList.add("motion");
+/* A board's own slot in the deck, in page pixels. A parked board reports
+   where it is STUCK, not where it sits, so anything that needs to know where
+   a board really is (a nav link, the plane) adds up the flow instead: boards
+   are block siblings, so the slot is the deck's content top plus every
+   board above it. */
+function slotOf(board: El): number {
+  const deck = board.parentElement as El;
+  let y = deck.getBoundingClientRect().top + window.scrollY + parseFloat(getComputedStyle(deck).paddingTop);
+  for (const s of all(":scope > .slide", deck)) {
+    if (s === board) break;
+    y += s.offsetHeight + parseFloat(getComputedStyle(s).marginBottom);
+  }
+  return y;
+}
+const parkLine = () => parseFloat(getComputedStyle(root).getPropertyValue("--park")) || 0;
+
+/* Plenty of Windows machines ship with "Animation effects" off, and Chrome
+   reports that as `prefers-reduced-motion: reduce`. Honouring it silently
+   meant those visitors only ever saw a static deck, so motion is opt-out
+   instead: Layout's head script sets `.still` from the remembered choice
+   before first paint, and the stylesheet only hides the reveal groups while
+   `.motion` is on, so a failed or skipped boot leaves a readable page. */
+const still = root.classList.contains("still");
+if (!still) root.classList.add("motion");
 
 /* ── what moves, and in what order it is claimed ─────────────── */
 const SEL = {
@@ -672,8 +696,8 @@ function logo() {
 
 /* ── 9c. a detail you can take with you ───────────────────────
 
-   This is a real control, so it is registered before the reduced-motion
-   gate: someone who switched motion off still gets the clipboard.        */
+   This is a real control, so it is registered before the motion gate:
+   someone who switched motion off still gets the clipboard.             */
 function copies() {
   const buttons = all(".copy");
   if (!buttons.length) return;
@@ -726,6 +750,179 @@ function copies() {
   }
 }
 
+/* ── 9d. the motion switch ─────────────────────────────────────
+
+   Also a control. Tearing every tween, trigger, split and the smooth
+   scroller down in place is a lot of code for a switch flipped once, so
+   the choice is stored and the page reloads into it (the browser keeps
+   the scroll position).                                                  */
+function motionSwitch() {
+  const btn = one(".nav__motion");
+  if (!btn) return;
+  btn.setAttribute("aria-pressed", String(!still));
+  btn.addEventListener("click", () => {
+    try {
+      localStorage.setItem("deck-motion", still ? "on" : "off");
+    } catch {
+      return;
+    }
+    location.reload();
+  });
+}
+
+/* ── 10. the paper plane: one thing carried through the deck ───
+
+   Scrollytelling rather than ornament. A task leaves the cover folded into
+   a paper plane and is carried board to board: it perches on each board's
+   pen word while that board is parked, and flies while the next board
+   climbs over it, until it lands on the last sheet. The stack cuts the page
+   into eleven frames; the plane is the one continuous thing the eye can
+   follow across the cuts.                                                */
+const PERCH = ":is(h1, h2) .script, .ft__sign";
+const PLANE = `<svg viewBox="0 0 72 44">
+  <path class="plane__wing" d="M70 20 L2 5 L25 24 Z"/>
+  <path class="plane__keel" d="M70 20 L25 24 L18 39 Z"/>
+  <path class="plane__flap" d="M25 24 L18 39 L31 28 Z"/>
+</svg>`;
+const TRAIL = 30;
+const SVGNS = "http://www.w3.org/2000/svg";
+
+function traveller(slides: El[]) {
+  gsap.matchMedia().add("(min-width: 1000px) and (min-height: 700px)", () => {
+    const plane = doc.createElement("div");
+    plane.className = "plane";
+    plane.setAttribute("aria-hidden", "true");
+    plane.innerHTML = PLANE;
+    const trail = doc.createElementNS(SVGNS, "svg");
+    trail.setAttribute("class", "plane__trail");
+    trail.setAttribute("aria-hidden", "true");
+    const ink = doc.createElementNS(SVGNS, "path");
+    trail.appendChild(ink);
+    doc.body.append(trail, plane);
+
+    /* what it sits on: the pen-written half of each board's heading, else
+       the heading itself (Contact), else the sign-off (the footer) */
+    const perches = slides.map(
+      (s) => all(PERCH, s).find((w) => w.textContent?.trim()) || one(":is(h1, h2)", s) || s
+    );
+
+    /* Board i holds the plane from the scroll at which it parks until the
+       next board's top reaches the bottom of the screen; the flight fills
+       the climb in between. */
+    let parks: number[] = [];
+    let leaves: number[] = [];
+    let size = 0;
+    const measure = () => {
+      const vh = window.innerHeight;
+      const slots = slides.map(slotOf);
+      const line = parkLine();
+      parks = slots.map((y, i) => (i ? y - line : -Infinity));
+      leaves = slots.map((_, i) => (i < slots.length - 1 ? slots[i + 1] - vh : Infinity));
+      size = plane.offsetWidth;
+    };
+    measure();
+    ScrollTrigger.addEventListener("refresh", measure);
+
+    /* the perch is the top of the word's last letter; an off-screen perch
+       is pulled into the frame so a far target never flings the plane */
+    const A = { x: 0, y: 0 };
+    const B = { x: 0, y: 0 };
+    const perch = (i: number, p: { x: number; y: number }, vw: number, vh: number) => {
+      const r = perches[i].getBoundingClientRect();
+      p.x = gsap.utils.clamp(vw * 0.05, vw * 0.93, r.right + size * 0.3);
+      p.y = gsap.utils.clamp(vh * 0.16, vh * 0.9, r.top + r.height * 0.12);
+    };
+
+    const xs = new Float32Array(TRAIL);
+    const ys = new Float32Array(TRAIL);
+    let head = 0;
+    let calm = TRAIL + 1;
+    let primed = false;
+    let px = 0;
+    let py = 0;
+    let angle = 0;
+    let face = 1;
+    let turn = 1;
+
+    const tick = (time: number) => {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const at = window.scrollY;
+      let i = 0;
+      while (i < parks.length - 1 && at >= parks[i + 1]) i++;
+
+      perch(i, A, vw, vh);
+      let x = A.x;
+      let y = A.y;
+      const flying = at > leaves[i];
+      if (flying) {
+        perch(i + 1, B, vw, vh);
+        const t = gsap.utils.clamp(0, 1, (at - leaves[i]) / (parks[i + 1] - leaves[i]));
+        const e = t * t * (3 - 2 * t);
+        const arc = Math.sin(Math.PI * e);
+        /* it swoops out across the open sheet, toward the middle from
+           whichever side it perched on, and climbs a little: every
+           hand-over reads as a flight rather than a slide */
+        const swing = (A.x > vw / 2 ? -1 : 1) * vw * 0.24;
+        x = A.x + (B.x - A.x) * e + arc * swing;
+        y = A.y + (B.y - A.y) * e - arc * vh * 0.14;
+      } else {
+        y += Math.sin(time * 2.1) * 2.5;
+      }
+
+      if (!primed) {
+        px = x;
+        py = y;
+        xs.fill(x);
+        ys.fill(y);
+        primed = true;
+      }
+      const dx = x - px;
+      const dy = y - py;
+      px = x;
+      py = y;
+
+      /* nose along the flight; perched, a little up. Facing flips through
+         zero width, so it banks round rather than mirroring in one frame */
+      let aim = -0.1 * face;
+      if (flying && dx * dx + dy * dy > 0.5) {
+        const heading = Math.atan2(dy, dx);
+        const c = Math.cos(heading);
+        if (c > 0.25) face = 1;
+        else if (c < -0.25) face = -1;
+        aim = face === 1 ? heading : heading - Math.PI * Math.sign(heading || 1);
+        aim = gsap.utils.clamp(-0.7, 0.7, aim);
+      }
+      angle += (aim - angle) * 0.14;
+      turn += (face - turn) * 0.16;
+      plane.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%) rotate(${angle}rad) scaleX(${turn})`;
+
+      /* the pen line it leaves; once it has sat still long enough for the
+         line to shrink into it, the path stops being rewritten */
+      calm = flying ? 0 : calm + 1;
+      if (calm > TRAIL) return;
+      head = (head + 1) % TRAIL;
+      xs[head] = x;
+      ys[head] = y;
+      let d = "";
+      for (let n = 1; n <= TRAIL; n++) {
+        const j = (head + n) % TRAIL;
+        d += `${n === 1 ? "M" : "L"}${xs[j].toFixed(1)} ${ys[j].toFixed(1)}`;
+      }
+      ink.setAttribute("d", calm === TRAIL ? "" : d);
+    };
+    gsap.ticker.add(tick);
+    gsap.fromTo(plane, { opacity: 0 }, { opacity: 1, duration: 0.7, delay: window.scrollY < 10 ? 1.6 : 0.2 });
+
+    return () => {
+      gsap.ticker.remove(tick);
+      ScrollTrigger.removeEventListener("refresh", measure);
+      plane.remove();
+      trail.remove();
+    };
+  });
+}
+
 /* ── 0. smooth scroll ────────────────────────────────────────────
 
    Lenis in its default mode animates the real scroll position — it does
@@ -743,13 +940,43 @@ function smooth() {
   gsap.ticker.add((time) => lenis.raf(time * 1000));
   gsap.ticker.lagSmoothing(0);
 
-  /* Lenis owns the scroll position from here, so a deep link has to be
-     replayed through it or it springs back to the top */
-  const park = () => parseFloat(getComputedStyle(root).getPropertyValue("--park")) || 0;
-  const landed = location.hash.length > 1 ? one(location.hash) : null;
-  if (landed) requestAnimationFrame(() => lenis.scrollTo(landed, { offset: -park(), immediate: true }));
+  /* an overlay (the resume sheet) holds the deck still while it is open */
+  doc.addEventListener("deck:lock", (e) =>
+    (e as CustomEvent<boolean>).detail ? lenis.stop() : lenis.start()
+  );
 
-  /* in-page links have to go through Lenis or they fight it */
+  /* Where a link lands. Lenis measures `getBoundingClientRect`, which aimed
+     every link to a board above the one on screen at the board on screen
+     (see `slotOf`), so the page barely moved. Stacked, a board is home when
+     it sits exactly on its park line. */
+  const destination = (el: El): number => {
+    const board = el.closest<El>(".deck > .slide");
+    if (!board) return el.getBoundingClientRect().top + window.scrollY - parkLine();
+    const inset = root.classList.contains("stacked")
+      ? parkLine()
+      : parseFloat(getComputedStyle(board).scrollMarginTop) || 0;
+    return Math.max(0, slotOf(board) - inset);
+  };
+
+  /* Lenis owns the scroll position from here, so a deep link has to be
+     replayed through it or it springs back to the top. Lenis measured the
+     page before the stack resized the boards, so its scroll limit is stale
+     here and would clamp the landing short: re-measure first. */
+  const land = (el: El | null) => {
+    if (!el) return;
+    lenis.resize();
+    lenis.scrollTo(destination(el), { immediate: true });
+  };
+  const hashed = () => (location.hash.length > 1 ? one(location.hash) : null);
+  if (hashed()) requestAnimationFrame(() => land(hashed()));
+  /* a hash typed into the address bar scrolls natively to the board's
+     stuck rect, which is the wrong place for the same reason */
+  window.addEventListener("hashchange", () => land(hashed()));
+
+  /* In-page links go through Lenis or they fight it. They travel on a
+     timed ease rather than the wheel lerp: the lerp covered five boards in
+     a blink, so a nav jump never showed the stack doing its work. */
+  const travel = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
   doc.addEventListener("click", (e) => {
     const link = (e.target as Element | null)?.closest?.('a[href^="#"]') as HTMLAnchorElement | null;
     if (!link) return;
@@ -757,19 +984,19 @@ function smooth() {
     const target = id.length > 1 ? one(id) : null;
     if (!target && id !== "#top") return;
     e.preventDefault();
-    lenis.scrollTo(target || 0, { offset: -park() });
+    const to = target ? destination(target) : 0;
+    const boards = Math.abs(to - window.scrollY) / window.innerHeight;
+    lenis.scrollTo(to, { duration: Math.min(2.6, 0.7 + boards * 0.32), easing: travel });
   });
 }
 
 /* ── boot ────────────────────────────────────────────────────── */
 function boot() {
-  /* a control, not an animation: it runs whatever the motion setting is */
+  /* controls, not animations: they run whatever the motion setting is */
   copies();
+  motionSwitch();
 
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    root.classList.remove("motion");
-    return;
-  }
+  if (still) return;
 
   try {
     const slides = all(".deck > .slide");
@@ -785,6 +1012,8 @@ function boot() {
     navState();
     logo();
     velocity();
+    backdrop(slides);
+    traveller(slides);
 
     ScrollTrigger.refresh();
     window.addEventListener("load", () => ScrollTrigger.refresh(), { once: true });

@@ -114,12 +114,18 @@ const depth = { nine: 14, twentyone: 6, twelve: 10, eleven: 17 } as Record<strin
     line-height: 1.4;
   }
   /* a rule under each label, drawn in as the board is read */
-  /* the ring a hand would put round the figure that carries the board */
+  /* The ring a hand would put round the figure that carries the board.
+     It is sized in the figure's own em, not off the item: the item is as
+     wide as its label, so a percentage ring came out narrower than the 9 it
+     was meant to hold. Measured off the Fraunces Black 9, the ink spans
+     0.03–0.59em across and 0.05–0.77em down the figure's box. */
   .num__ring {
-    left: -10%;
-    top: -6%;
-    width: 124%;
+    font-size: var(--nine);
+    left: -0.13em;
+    top: -0.1em;
+    width: 0.86em;
     height: auto;
+    rotate: -5deg;
     --ink-w: 2.6;
     z-index: 0;
     opacity: 0.85;
@@ -137,8 +143,11 @@ const depth = { nine: 14, twentyone: 6, twelve: 10, eleven: 17 } as Record<strin
   .num__item--twentyone { left: 30%; top: 1%; }
   .num__item--twentyone .num__fig { font-size: clamp(7rem, min(34cqi, 50vh), 26rem); }
 
-  .num__item--nine { left: 2%; top: 46%; }
-  .num__item--nine .num__fig { font-size: clamp(5rem, min(31cqi, 45vh), 23rem); }
+  .num__item--nine { --nine: clamp(5rem, min(31cqi, 45vh), 23rem); left: 2%; top: 43%; }
+  .num__item--nine .num__fig { font-size: var(--nine); }
+  /* the ring runs below the figure's box, so the label steps under it */
+  .num__item--nine .num__l { margin-top: calc(var(--nine) * 0.11); }
+  @media (max-width: 860px) { .num__item--nine .num__l { margin-top: 0; } }
 
   .num__item--twelve { right: 1.5%; top: 40%; }
   .num__item--twelve .num__fig { font-size: clamp(5rem, min(30cqi, 43vh), 22rem); }

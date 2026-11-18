@@ -57,7 +57,7 @@
 * { margin: 0; }
 
 html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+html.still { scroll-behavior: auto; }
 
 body {
   background: var(--page);
@@ -429,6 +429,46 @@ button { font: inherit; color: inherit; }
 }
 .nav__cta:hover, .nav__cta:focus-visible { color: var(--paper); background: var(--pen-2); }
 @media (max-width: 860px) { .nav__links { display: none; } }
+/* the motion switch: a pen-drawn toggle in the running head */
+.nav__end { display: flex; align-items: center; gap: clamp(0.6rem, 1.4vw, 1.1rem); }
+.nav__motion {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 44px;
+  padding: 0 0.2rem;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  color: var(--body);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.nav__motion:hover { color: var(--pen-2); }
+.nav__motion-dot {
+  position: relative;
+  width: 1.9rem;
+  height: 0.95rem;
+  border: 1px solid var(--pen-2);
+  border-radius: 999px;
+}
+.nav__motion-dot::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0.16rem;
+  width: 0.58rem;
+  height: 0.58rem;
+  border-radius: 50%;
+  background: var(--pen-2);
+  translate: 0.92rem -50%;
+  transition: translate 0.3s var(--ease), background-color 0.3s var(--ease);
+}
+html.still .nav__motion-dot::after { translate: 0 -50%; background: var(--muted); }
+.nav__motion-off, html.still .nav__motion-on { display: none; }
+html.still .nav__motion-off { display: inline; }
+
 /* ── deck HUD: which board you are on ──────────────────────────
    Every board is paper now, so the HUD is simply drawn in pen rather than
    blended against an alternating ground.                              */
@@ -704,8 +744,50 @@ button { font: inherit; color: inherit; }
 .btn:active { translate: 0 2px; }
 .nav__cta:active { translate: 0 1px; }
 
-@media (prefers-reduced-motion: reduce) {
-  .copy, .copy__stamp, .nav__name { transition: none; }
-  .mk path, .ink path { stroke-dashoffset: 0; }
-  .proj .d1, .num__by, .ft__mark { text-shadow: none; }
+html.still :is(.copy, .copy__stamp, .nav__name) { transition: none; }
+html.still :is(.mk path, .ink path) { stroke-dashoffset: 0; }
+html.still :is(.proj .d1, .num__by, .ft__mark) { text-shadow: none; }
+
+/* ── the paper plane motion.ts carries through the deck ──────────
+   Fixed above the boards and under the running head. The stroke does not
+   scale with the plane, so it stays the same pen weight as every other
+   drawn mark on the deck.                                              */
+.plane {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 35;
+  width: clamp(64px, 5.6vw, 104px);
+  pointer-events: none;
+  opacity: 0;
+  will-change: transform;
+  filter: drop-shadow(0 7px 5px rgba(14, 21, 9, 0.22));
+}
+.plane svg { display: block; width: 100%; height: auto; overflow: visible; }
+.plane path {
+  stroke: var(--pen-2);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.plane__wing { fill: var(--cream); }
+.plane__keel { fill: var(--wash); }
+.plane__flap { fill: var(--cream-2); }
+.plane__trail {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 34;
+  pointer-events: none;
+  overflow: visible;
+}
+.plane__trail path {
+  fill: none;
+  stroke: var(--pen);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 2 7;
+  opacity: 0.6;
 }

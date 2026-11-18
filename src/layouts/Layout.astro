@@ -43,6 +43,13 @@ const ogImage = new URL("/og.png", Astro.site);
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Caveat:wght@500..700&family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..900,0..100,0..1;1,9..144,300..900,0..100,0..1&display=swap"
     />
+    <!-- the remembered motion choice has to land before first paint, or a
+         visitor who switched motion off sees the reveal groups flash hidden -->
+    <script is:inline>
+      try {
+        if (localStorage.getItem("deck-motion") === "off") document.documentElement.classList.add("still");
+      } catch {}
+    </script>
   </head>
 
   <body>
@@ -57,7 +64,14 @@ const ogImage = new URL("/og.png", Astro.site);
         <nav class="nav__links" aria-label="Sections">
           {nav.map((n) => <a href={n.href}>{n.t}</a>)}
         </nav>
-        <a class="btn nav__cta" href="#contact"><span>Hire me</span></a>
+        <div class="nav__end">
+          <button class="nav__motion" type="button" aria-pressed="true">
+            <span class="nav__motion-dot" aria-hidden="true"></span>
+            <span class="nav__motion-on">Motion on</span>
+            <span class="nav__motion-off">Motion off</span>
+          </button>
+          <a class="btn nav__cta" href="#contact"><span>Hire me</span></a>
+        </div>
       </div>
     </header>
 
