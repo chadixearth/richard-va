@@ -492,6 +492,7 @@ html.still .nav__motion-off { display: inline; }
 }
 .hud.is-on { opacity: 1; }
 .hud__n { font-size: 0.82rem; letter-spacing: 0.04em; }
+.hud__clock { font-size: 0.6rem; letter-spacing: 0.02em; margin-bottom: 0.3rem; }
 .hud__rail { position: relative; width: 1px; height: clamp(90px, 14vh, 150px); background: var(--rule); }
 .hud__fill {
   position: absolute;
@@ -748,46 +749,50 @@ html.still :is(.copy, .copy__stamp, .nav__name) { transition: none; }
 html.still :is(.mk path, .ink path) { stroke-dashoffset: 0; }
 html.still :is(.proj .d1, .num__by, .ft__mark) { text-shadow: none; }
 
-/* ── the paper plane motion.ts carries through the deck ──────────
-   Fixed above the boards and under the running head. The stroke does not
-   scale with the plane, so it stays the same pen weight as every other
-   drawn mark on the deck.                                              */
-.plane {
-  position: fixed;
-  left: 0;
-  top: 0;
-  z-index: 35;
-  width: clamp(64px, 5.6vw, 104px);
-  pointer-events: none;
-  opacity: 0;
-  will-change: transform;
-  filter: drop-shadow(0 7px 5px rgba(14, 21, 9, 0.22));
-}
-.plane svg { display: block; width: 100%; height: auto; overflow: visible; }
-.plane path {
-  stroke: var(--pen-2);
-  stroke-width: 1.6;
-  stroke-linejoin: round;
-  vector-effect: non-scaling-stroke;
-}
-.plane__wing { fill: var(--cream); }
-.plane__keel { fill: var(--wash); }
-.plane__flap { fill: var(--cream-2); }
-.plane__trail {
+/* ── daylight: the light falling on the desk (daylight.ts) ──────
+   Above the boards and the running head, so the whole desk shares one
+   light. Normal alpha only: a blended full-screen layer could never be
+   cached, and over this paper multiply buys nothing a plain wash doesn't. */
+.daylight {
   position: fixed;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 34;
+  z-index: 45;
   pointer-events: none;
-  overflow: visible;
+  overflow: hidden;
+  contain: strict;
+  opacity: 0;
 }
-.plane__trail path {
-  fill: none;
-  stroke: var(--pen);
-  stroke-width: 1.7;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 2 7;
-  opacity: 0.6;
+.daylight > * { position: absolute; inset: 0; will-change: opacity; }
+.daylight__sun {
+  background: linear-gradient(116deg, rgba(255, 205, 140, 0.3) 0%, rgba(255, 214, 165, 0.11) 34%,
+    rgba(255, 214, 165, 0) 58%, rgba(70, 90, 130, 0.07) 100%);
+}
+.daylight__gold {
+  opacity: 0;
+  background: linear-gradient(244deg, rgba(255, 160, 60, 0.3) 0%, rgba(255, 172, 86, 0.12) 38%,
+    rgba(255, 172, 86, 0) 62%, rgba(80, 42, 12, 0.1) 100%);
+}
+.daylight__leaves { inset: -18%; opacity: 0; will-change: transform, opacity; }
+.daylight__leaves i {
+  position: absolute;
+  inset: 0;
+  background: center / cover no-repeat;
+  will-change: transform;
+}
+/* after dark the edges of the desk fall away and a lamp holds the sign-off */
+.daylight__dusk {
+  opacity: 0;
+  background: radial-gradient(ellipse 85% 80% at 56% 64%, rgba(20, 28, 52, 0) 30%, rgba(20, 28, 52, 0.26) 100%);
+}
+.daylight__lamp {
+  opacity: 0;
+  background: radial-gradient(ellipse 60% 55% at 56% 64%, rgba(255, 184, 96, 0.26),
+    rgba(255, 190, 110, 0.1) 50%, rgba(255, 190, 110, 0) 75%);
+}
+/* a lens falls off toward the frame edge */
+.daylight::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 75% 70% at 50% 46%, rgba(14, 21, 9, 0) 60%, rgba(14, 21, 9, 0.13) 100%);
 }
